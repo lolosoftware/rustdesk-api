@@ -233,6 +233,10 @@ window.setByName = (name, value) => {
             curConn.setRemember(value.remember == 'true');
             curConn.login(value.password);
             break;
+        case 'send_2fa':
+            value = JSON.parse(value);
+            curConn.send2fa(value.code);
+            break;
         case 'close':
             close();
             break;

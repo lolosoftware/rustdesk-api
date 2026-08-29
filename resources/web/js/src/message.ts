@@ -1206,6 +1206,11 @@ export interface Misc {
   back_notification?: BackNotification | undefined;
 }
 
+export interface Auth2FA {
+  code: string;
+  hwid: Uint8Array;
+}
+
 export interface Message {
   signed_id?: SignedId | undefined;
   public_key?: PublicKey | undefined;
@@ -1225,7 +1230,31 @@ export interface Message {
   file_response?: FileResponse | undefined;
   misc?: Misc | undefined;
   cliprdr?: Cliprdr | undefined;
+  auth_2fa?: Auth2FA | undefined;
 }
+
+function createBaseAuth2FA(): Auth2FA {
+  return { code: "", hwid: new Uint8Array() };
+}
+
+export const Auth2FA = {
+  encode(message: Auth2FA, writer: _m0.Writer = _m0.Writer.create()): _m0.Writer {
+    if (message.code !== "") {
+      writer.uint32(10).string(message.code);
+    }
+    if (message.hwid.length !== 0) {
+      writer.uint32(18).bytes(message.hwid);
+    }
+    return writer;
+  },
+
+  fromPartial<I extends Exact<DeepPartial<Auth2FA>, I>>(object: I): Auth2FA {
+    const message = createBaseAuth2FA();
+    message.code = object.code ?? "";
+    message.hwid = object.hwid ?? new Uint8Array();
+    return message;
+  },
+};
 
 function createBaseVP9(): VP9 {
   return { data: new Uint8Array(), key: false, pts: 0 };
@@ -5752,6 +5781,7 @@ function createBaseMessage(): Message {
     file_response: undefined,
     misc: undefined,
     cliprdr: undefined,
+    auth_2fa: undefined,
   };
 }
 
@@ -5810,6 +5840,9 @@ export const Message = {
     }
     if (message.cliprdr !== undefined) {
       Cliprdr.encode(message.cliprdr, writer.uint32(162).fork()).ldelim();
+    }
+    if (message.auth_2fa !== undefined) {
+      Auth2FA.encode(message.auth_2fa, writer.uint32(218).fork()).ldelim();
     }
     return writer;
   },
@@ -5996,6 +6029,9 @@ export const Message = {
     message.misc = (object.misc !== undefined && object.misc !== null) ? Misc.fromPartial(object.misc) : undefined;
     message.cliprdr = (object.cliprdr !== undefined && object.cliprdr !== null)
       ? Cliprdr.fromPartial(object.cliprdr)
+      : undefined;
+    message.auth_2fa = (object.auth_2fa !== undefined && object.auth_2fa !== null)
+      ? Auth2FA.fromPartial(object.auth_2fa)
       : undefined;
     return message;
   },

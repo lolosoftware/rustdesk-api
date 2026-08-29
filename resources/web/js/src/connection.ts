@@ -264,6 +264,8 @@ export default class Connection {
               r.error,
               "Do you want to enter again?"
             );
+          } else if (r.error == "2FA Required" || r.error == "Wrong 2FA Code") {
+            this.msgbox("input-2fa", "Two-factor authentication", r.error);
           } else {
             this.msgbox("error", "Login Error", r.error);
           }
@@ -372,6 +374,12 @@ export default class Connection {
       }
       this._sendLoginMessage(p);
     }
+  }
+
+  send2fa(code: string) {
+    this._ws?.sendMessage({
+      auth_2fa: message.Auth2FA.fromPartial({ code }),
+    });
   }
 
   async reconnect() {
@@ -571,6 +579,11 @@ export default class Connection {
   ) {
     const key_event = mapKey(name, globals.isDesktop());
     if (!key_event) return;
+    const chr = key_event.chr;
+    if (shift && chr !== undefined && chr >= 97 && chr <= 122) {
+      key_event.chr = chr - 32;
+      shift = false;
+    }
     if (alt && (name == "VK_MENU" || name == "RAlt")) {
       alt = false;
     }
