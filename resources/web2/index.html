@@ -6,7 +6,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <title>RustDesk Web Client</title>
   <script>
-    (() => {
+    (async () => {
       const hash = window.location.hash;
       let targetHash = hash || '#/';
 
@@ -26,6 +26,14 @@
 
       const target = new URL('../webclient/', window.location.href);
       target.hash = targetHash.slice(1);
+
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations
+          .filter((registration) => new URL(registration.scope).pathname.includes('/webclient2/'))
+          .map((registration) => registration.unregister()));
+      }
+
       window.location.replace(target.toString());
     })();
   </script>
