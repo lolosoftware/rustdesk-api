@@ -965,7 +965,7 @@ const RESOURCES = {
 "libopus.wasm": "b8801d4a953d58e739fd9d25134467d3",
 "favicon.svg": "8452bf248b5b5519dea5f3c724bbac9d",
 "manifest.json": "18e53390c166023eb5b32e95b324ec2b",
-"index.html": "aa17be8085891f9d20ea80d0479a61a1",
+"index.html": "0c342378249d9b18139c99779d2552b7",
 "websocket-proxy.js": "589dec5ba02589183ca9364c39df5e41",
 "cursor-bridge.js": "98f750138e1509716e6a13707ca1505a",
 "libopus.js": "b58c2084b852e6df5ec89fd16adcf920",
