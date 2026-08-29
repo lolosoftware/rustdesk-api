@@ -190,7 +190,7 @@ Le tableau ci-dessous n’est pas exhaustif. Consultez le fichier `conf/config.y
 | RUSTDESK_API_RUSTDESK_KEY | Clé RustDesk | 123456789 |
 | RUSTDESK_API_RUSTDESK_KEY_FILE | Fichier contenant la clé RustDesk | `./conf/data/id_ed25519.pub` |
 | RUSTDESK_API_RUSTDESK_WEBCLIENT<br/>_MAGIC_QUERYONLINE | Activer la nouvelle méthode de requête de statut en ligne dans le client web v2 ; `1` = activée, `0` = désactivée, défaut `0` | `0` |
-| RUSTDESK_API_RUSTDESK_WS_HOST | Host WebSocket personnalisé | `wss://192.168.1.123:1234` |
+| RUSTDESK_API_RUSTDESK_WS_HOST | Base HTTPS/WSS optionnelle du proxy WebSocket. Le client ajoute `/id` pour le port 21118 et `/relay` pour le port 21119 | `https://rdapi.example.com/webclient-ws` |
 | ---- PROXY ----- | --- | --- |
 | RUSTDESK_API_PROXY_ENABLE | Activer le proxy : `false`, `true` | `false` |
 | RUSTDESK_API_PROXY_HOST | Adresse du proxy | `http://127.0.0.1:1080` |

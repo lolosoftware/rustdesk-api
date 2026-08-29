@@ -952,7 +952,7 @@ const RESOURCES = {
 "js/dist/index.js": "b3594839149401c56ab0d9a2f2521be4",
 "js/dist/index.css": "325598511be4c5926c2e5bd308a3ea4c",
 "js/dist/index.html": "85716a9a0538b47b808045f6923bc8d8",
-"/": "9b99772caf6b8d68072a4078eb3fc94f",
+"/": "6f833683e39c243afa4b6a45c192bb57",
 "js/dist/vendor.js": "158a0d2d986f84d64c5e9a2171201bb6",
 "js/tsconfig.json": "f86d42481984659e240ce7b6c6648fcb",
 "js/vite.config.js": "42132f5fd99e75b4025408f9050436ec",
@@ -965,7 +965,8 @@ const RESOURCES = {
 "libopus.wasm": "b8801d4a953d58e739fd9d25134467d3",
 "favicon.svg": "8452bf248b5b5519dea5f3c724bbac9d",
 "manifest.json": "18e53390c166023eb5b32e95b324ec2b",
-"index.html": "9b99772caf6b8d68072a4078eb3fc94f",
+"index.html": "6f833683e39c243afa4b6a45c192bb57",
+"websocket-proxy.js": "589dec5ba02589183ca9364c39df5e41",
 "libopus.js": "b58c2084b852e6df5ec89fd16adcf920",
 "main.dart.js": "cb251c69a54d60081a5e54365f49f654",
 "libs/firebase-app.js": "f61459b893c6422d6e8e96e8aa5fbdcd",
@@ -1028,6 +1029,7 @@ const RESOURCES = {
 const CORE = [
   "main.dart.js",
 "index.html",
+"websocket-proxy.js",
 "assets/AssetManifest.json",
 "assets/FontManifest.json"];
 // During install, the TEMP cache is populated with the application shell files.
