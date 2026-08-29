@@ -6,6 +6,7 @@ type Login struct {
 	Platform  string `json:"platform" label:"平台"`
 	Captcha   string `json:"captcha,omitempty" label:"验证码"`
 	CaptchaId string `json:"captcha_id,omitempty"`
+	OtpCode   string `json:"otp_code,omitempty" label:"OTP"`
 }
 
 type LoginLogQuery struct {

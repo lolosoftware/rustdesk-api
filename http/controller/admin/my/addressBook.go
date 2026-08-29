@@ -218,16 +218,16 @@ func (ct *AddressBook) BatchCreateFromPeers(c *gin.Context) {
 			return
 		}
 	}
-	if len(f.PeerIds) == 0 {
+	peerIds := admin.NormalizePeerIDs(f.PeerIds)
+	if len(peerIds) == 0 {
 		response.Fail(c, 101, response.TranslateMsg(c, "ParamsError"))
 		return
 	}
-	pl := int64(len(f.PeerIds))
-	peers := service.AllService.PeerService.List(1, uint(pl), func(tx *gorm.DB) {
-		tx.Where("row_id in ?", f.PeerIds)
+	peers := service.AllService.PeerService.List(1, uint(len(peerIds)), func(tx *gorm.DB) {
+		tx.Where("row_id in ?", peerIds)
 		tx.Where("user_id = ?", u.Id)
 	})
-	if peers.Total == 0 || pl != peers.Total {
+	if peers.Total == 0 {
 		response.Fail(c, 101, response.TranslateMsg(c, "ItemNotFound"))
 		return
 	}

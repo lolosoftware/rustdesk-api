@@ -337,11 +337,16 @@ func (ct *AddressBook) BatchCreateFromPeers(c *gin.Context) {
 		}
 	}
 
-	pl := int64(len(f.PeerIds))
-	peers := service.AllService.PeerService.List(1, uint(pl), func(tx *gorm.DB) {
-		tx.Where("row_id in ?", f.PeerIds)
+	peerIds := admin.NormalizePeerIDs(f.PeerIds)
+	if len(peerIds) == 0 {
+		response.Fail(c, 101, response.TranslateMsg(c, "ParamsError"))
+		return
+	}
+
+	peers := service.AllService.PeerService.List(1, uint(len(peerIds)), func(tx *gorm.DB) {
+		tx.Where("row_id in ?", peerIds)
 	})
-	if peers.Total == 0 || pl != peers.Total {
+	if peers.Total == 0 {
 		response.Fail(c, 101, response.TranslateMsg(c, "ItemNotFound"))
 		return
 	}

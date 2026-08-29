@@ -129,6 +129,26 @@ type BatchCreateFromPeersForm struct {
 	Tags         []string `json:"tags"`
 	UserId       uint     `json:"user_id"`
 }
+
+func NormalizePeerIDs(ids []uint) []uint {
+	if len(ids) == 0 {
+		return nil
+	}
+	seen := make(map[uint]struct{}, len(ids))
+	result := make([]uint, 0, len(ids))
+	for _, id := range ids {
+		if id == 0 {
+			continue
+		}
+		if _, exists := seen[id]; exists {
+			continue
+		}
+		seen[id] = struct{}{}
+		result = append(result, id)
+	}
+	return result
+}
+
 type BatchUpdateTagsForm struct {
 	RowIds []uint   `json:"row_ids"`
 	Tags   []string `json:"tags"`

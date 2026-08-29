@@ -1,6 +1,7 @@
 services:
   rustdesk-api:
-    image: lolosoftware/rustdesk-api
+    image: ghcr.io/lolosoftware/rustdesk-api:latest
+    # image: ghcr.io/lolosoftware/rustdesk-api:v1.2.3
     container_name: rustdesk-api
     environment:
       - TZ=Asia/Shanghai

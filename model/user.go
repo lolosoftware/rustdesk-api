@@ -2,16 +2,17 @@ package model
 
 type User struct {
 	IdModel
-	Username string `json:"username" gorm:"default:'';not null;uniqueIndex"`
-	Email    string `json:"email" gorm:"default:'';not null;index"`
-	// Email	string     	`json:"email" `
-	Password string     `json:"-" gorm:"default:'';not null;"`
-	Nickname string     `json:"nickname" gorm:"default:'';not null;"`
-	Avatar   string     `json:"avatar" gorm:"default:'';not null;"`
-	GroupId  uint       `json:"group_id" gorm:"default:0;not null;index"`
-	IsAdmin  *bool      `json:"is_admin" gorm:"default:0;not null;"`
-	Status   StatusCode `json:"status" gorm:"default:1;not null;"`
-	Remark   string     `json:"remark" gorm:"default:'';not null;"`
+	Username  string     `json:"username" gorm:"default:'';not null;uniqueIndex"`
+	Email     string     `json:"email" gorm:"default:'';not null;index"`
+	Password  string     `json:"-" gorm:"default:'';not null;"`
+	Nickname  string     `json:"nickname" gorm:"default:'';not null;"`
+	Avatar    string     `json:"avatar" gorm:"default:'';not null;"`
+	GroupId   uint       `json:"group_id" gorm:"default:0;not null;index"`
+	IsAdmin   *bool      `json:"is_admin" gorm:"default:0;not null;"`
+	Status    StatusCode `json:"status" gorm:"default:1;not null;"`
+	Remark    string     `json:"remark" gorm:"default:'';not null;"`
+	OtpEnabled bool      `json:"otp_enabled" gorm:"default:false;not null;"`
+	OtpSecret string     `json:"otp_secret" gorm:"default:'';not null;"`
 	TimeModel
 }
 

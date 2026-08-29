@@ -2,6 +2,7 @@ package admin
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/lejianwen/rustdesk-api/v2/global"
@@ -84,6 +85,13 @@ func (ct *Login) Login(c *gin.Context) {
 		}
 		response.Fail(c, 101, response.TranslateMsg(c, "UserDisabled"))
 		return
+	}
+
+	if u.OtpEnabled {
+		if strings.TrimSpace(f.OtpCode) == "" || !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+			response.Fail(c, 101, response.TranslateMsg(c, "OtpCodeError"))
+			return
+		}
 	}
 
 	ut := service.AllService.UserService.Login(u, &model.LoginLog{

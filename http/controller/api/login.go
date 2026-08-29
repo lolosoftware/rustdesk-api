@@ -3,6 +3,9 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gin-gonic/gin"
 	"github.com/lejianwen/rustdesk-api/v2/global"
 	"github.com/lejianwen/rustdesk-api/v2/http/request/api"
@@ -10,7 +13,6 @@ import (
 	apiResp "github.com/lejianwen/rustdesk-api/v2/http/response/api"
 	"github.com/lejianwen/rustdesk-api/v2/model"
 	"github.com/lejianwen/rustdesk-api/v2/service"
-	"net/http"
 )
 
 type Login struct {
@@ -66,6 +68,13 @@ func (l *Login) Login(c *gin.Context) {
 	if !service.AllService.UserService.CheckUserEnable(u) {
 		response.Error(c, response.TranslateMsg(c, "UserDisabled"))
 		return
+	}
+
+	if u.OtpEnabled {
+		if strings.TrimSpace(f.OtpCode) == "" || !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+			response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
+			return
+		}
 	}
 
 	//根据refer判断是webclient还是app
