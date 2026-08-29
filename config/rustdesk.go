@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 )
 
 const (
@@ -26,6 +27,7 @@ type Rustdesk struct {
 func (rd *Rustdesk) LoadKeyFile() {
 	// Load key file
 	if rd.Key != "" {
+		rd.Key = strings.TrimSpace(rd.Key)
 		return
 	}
 	if rd.KeyFile != "" {
@@ -34,7 +36,7 @@ func (rd *Rustdesk) LoadKeyFile() {
 		if err != nil {
 			return
 		}
-		rd.Key = string(b)
+		rd.Key = strings.TrimSpace(string(b))
 		return
 	}
 }
