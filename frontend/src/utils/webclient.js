@@ -10,9 +10,8 @@ import { useAppStore } from '@/store/app'
 const app = useAppStore()
 
 export const toWebClientLink = (row) => {
-  //v2
   console.log(app.setting.rustdeskConfig)
-  window.open(`${app.setting.rustdeskConfig.api_server}/webclient2/#/${row.id}`)
+  window.open(`${app.setting.rustdeskConfig.api_server}/webclient/#/${row.id}`, '_blank', 'noopener,noreferrer')
 }
 
 export async function getPeerSlat (id) {
