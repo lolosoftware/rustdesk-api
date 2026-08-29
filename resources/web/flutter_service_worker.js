@@ -965,8 +965,9 @@ const RESOURCES = {
 "libopus.wasm": "b8801d4a953d58e739fd9d25134467d3",
 "favicon.svg": "8452bf248b5b5519dea5f3c724bbac9d",
 "manifest.json": "18e53390c166023eb5b32e95b324ec2b",
-"index.html": "6f833683e39c243afa4b6a45c192bb57",
+"index.html": "aa17be8085891f9d20ea80d0479a61a1",
 "websocket-proxy.js": "589dec5ba02589183ca9364c39df5e41",
+"cursor-bridge.js": "98f750138e1509716e6a13707ca1505a",
 "libopus.js": "b58c2084b852e6df5ec89fd16adcf920",
 "main.dart.js": "cb251c69a54d60081a5e54365f49f654",
 "libs/firebase-app.js": "f61459b893c6422d6e8e96e8aa5fbdcd",
@@ -1027,9 +1028,10 @@ const RESOURCES = {
 // The application shell files that are downloaded before a service worker can
 // start.
 const CORE = [
-  "main.dart.js",
+"main.dart.js",
 "index.html",
 "websocket-proxy.js",
+"cursor-bridge.js",
 "assets/AssetManifest.json",
 "assets/FontManifest.json"];
 // During install, the TEMP cache is populated with the application shell files.

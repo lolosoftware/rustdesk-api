@@ -45,20 +45,6 @@ jobs:
           mkdir -p resources/admin
           cp -R frontend/dist/. resources/admin/
 
-      - name: Build embedded web client bridge
-        shell: bash
-        run: |
-          cd resources/web/js
-          npm ci
-          npm run build
-          cd ../../..
-          for file in resources/web/js/dist/*; do
-            relative_path="${file#resources/web/}"
-            content_hash="$(md5sum "$file" | cut -d ' ' -f 1)"
-            sed -i -E "/\"${relative_path}\":/s/[a-f0-9]{32}/${content_hash}/" resources/web/flutter_service_worker.js
-            grep -Fq "\"${relative_path}\": \"${content_hash}\"" resources/web/flutter_service_worker.js
-          done
-
       - name: Build application bundle
         shell: bash
         run: |
