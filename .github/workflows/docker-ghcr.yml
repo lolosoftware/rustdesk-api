@@ -32,7 +32,19 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '18'
+
+      - name: Build administration frontend
+        shell: bash
+        run: |
+          rm -rf admin-frontend resources/admin
+          git clone --depth 1 https://github.com/lejianwen/rustdesk-api-web.git admin-frontend
+          cd admin-frontend
+          npm install
+          npm run build
+          cd ..
+          mkdir -p resources/admin
+          cp -R admin-frontend/dist/. resources/admin/
 
       - name: Build application bundle
         shell: bash
