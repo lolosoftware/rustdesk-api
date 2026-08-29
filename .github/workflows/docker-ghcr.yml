@@ -37,10 +37,12 @@ jobs:
       - name: Build application bundle
         shell: bash
         run: |
+          sudo apt-get update
+          sudo apt-get install -y musl-tools
           export PATH="$(go env GOPATH)/bin:$PATH"
           go install github.com/swaggo/swag/cmd/swag@latest
           chmod +x build.sh
-          ./build.sh
+          CGO_ENABLED=1 CC=musl-gcc CGO_LDFLAGS="-static" ./build.sh
           mkdir -p amd64
           cp -R release amd64/release
 
