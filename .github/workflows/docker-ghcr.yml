@@ -54,7 +54,7 @@ jobs:
           flutter build web --release
           cd ../..
           mkdir -p resources/web2
-          cp -R rustdesk-web-v2/build/web/. resources/web2/
+          cp -R rustdesk-web-v2/flutter/build/web/. resources/web2/
 
       - name: Build administration frontend
         shell: bash
