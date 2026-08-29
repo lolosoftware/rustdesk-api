@@ -51,7 +51,7 @@ jobs:
           cd flutter
           flutter create --platforms web --project-name rustdesk_web_client .
           flutter pub get
-          flutter build web --release
+          flutter build web --release --base-href /webclient2/
           cd ../..
           mkdir -p resources/web2
           cp -R rustdesk-web-v2/flutter/build/web/. resources/web2/
