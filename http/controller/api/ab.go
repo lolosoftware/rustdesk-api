@@ -32,7 +32,7 @@ type Ab struct {
 func (a *Ab) Ab(c *gin.Context) {
 	user := service.AllService.UserService.CurUser(c)
 
-	al := service.AllService.AddressBookService.ListByUserIdAndCollectionId(user.Id, 0, 1, 1000)
+	al := service.AllService.AddressBookService.ListByUserIdAndCollectionId(user.Id, 0, 1, 10000)
 	tags := service.AllService.TagService.ListByUserIdAndCollectionId(user.Id, 0)
 
 	tagColors := map[string]uint{}
@@ -548,7 +548,7 @@ func (a *Ab) Peers(c *gin.Context) {
 		return
 	}
 
-	al := service.AllService.AddressBookService.ListByUserIdAndCollectionId(uid, cid, 1, 1000)
+	al := service.AllService.AddressBookService.ListByUserIdAndCollectionId(uid, cid, 1, 10000)
 	c.JSON(http.StatusOK, gin.H{
 		"total":            al.Total,
 		"data":             al.AddressBooks,
