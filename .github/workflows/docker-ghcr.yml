@@ -49,7 +49,7 @@ jobs:
           git fetch --depth 1 origin 03a7fc5992069cc5bc9f7c36b872483dddf4f472
           git checkout --detach 03a7fc5992069cc5bc9f7c36b872483dddf4f472
           cd flutter
-          flutter create --platforms web .
+          flutter create --platforms web --project-name rustdesk_web_client .
           flutter pub get
           flutter build web --release
           cd ../..
