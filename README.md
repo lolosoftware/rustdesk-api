@@ -2,8 +2,7 @@
 
 [English Doc](README_EN.md)
 
-本项目使用 Go 实现了 RustDesk 的 API，并包含了 Web Admin 和 Web 客户端。
-
+Ce projet implémente l’API RustDesk en Go et inclut un panneau d’administration web ainsi qu’un client web.
 
 <div align=center>
 <img src="https://img.shields.io/badge/golang-1.22-blue"/>
@@ -14,65 +13,62 @@
 <img src="https://github.com/lejianwen/rustdesk-api/actions/workflows/build.yml/badge.svg"/>
 </div>
 
-## 搭配[lejianwen/rustdesk-server]使用更佳。
-> [lejianwen/rustdesk-server]fork自RustDesk Server官方仓库
-> 1. 解决了使用API链接超时问题
-> 2. 可以强制登录后才能发起链接
-> 3. 支持客户端websocket
+## Préférable avec [lejianwen/rustdesk-server].
+> [lejianwen/rustdesk-server] est un fork du dépôt officiel RustDesk Server.
+> 1. Corrige le problème de délai d’attente de connexion API.
+> 2. Permet de forcer la connexion avant d’initier une session.
+> 3. Prend en charge le websocket côté client.
 
+# Fonctionnalités
 
-
-# 特性
-
-- PC端API
-    - 个人版API
-    - 登录
-    - 地址簿
-    - 群组
-    - 授权登录
-      - 支持`github`, `google` 和 `OIDC` 登录，
-      - 支持`web后台`授权登录
-      - 支持`LDAP`(AD和OpenLDAP已测试), 如果API Server配置了LDAP
+- API côté PC
+    - API personnelle
+    - Connexion
+    - Carnet d’adresses
+    - Groupes
+    - Authentification autorisée
+      - Prise en charge de la connexion `GitHub`, `Google` et `OIDC`
+      - Prise en charge de l’authentification via le `back office web`
+      - Prise en charge de `LDAP` (AD et OpenLDAP testés), si le serveur API est configuré pour LDAP
     - i18n
 - Web Admin
-    - 用户管理
-    - 设备管理
-    - 地址簿管理
-    - 标签管理
-    - 群组管理
-    - Oauth 管理
-    - 配置LDAP, 配置文件或者环境变量
-    - 登录日志
-    - 链接日志
-    - 文件传输日志
-    - 快速使用web client
+    - Gestion des utilisateurs
+    - Gestion des appareils
+    - Gestion du carnet d’adresses
+    - Gestion des étiquettes
+    - Gestion des groupes
+    - Gestion OAuth
+    - Configuration LDAP via fichier ou variables d’environnement
+    - Journaux de connexion
+    - Journaux de connexion/liaison
+    - Journaux de transfert de fichiers
+    - Accès rapide au client web
     - i18n
-    - 通过 web client 分享给游客
-    - server控制(一些官方的简单的指令 [WIKI](https://github.com/lejianwen/rustdesk-api/wiki/Rustdesk-Command))
+    - Partage vers des invités via le client web
+    - Contrôle serveur (quelques commandes officielles simples : [WIKI](https://github.com/lejianwen/rustdesk-api/wiki/Rustdesk-Command))
 - Web Client
-    - 自动获取API server
-    - 自动获取ID服务器和KEY
-    - 自动获取地址簿
-    - 游客通过临时分享链接直接远程到设备
+    - Récupération automatique du serveur API
+    - Récupération automatique du serveur ID et de la clé
+    - Récupération automatique du carnet d’adresses
+    - Les invités peuvent accéder à distance au poste via un lien de partage temporaire
 - CLI
-    - 重置管理员密码
+    - Réinitialisation du mot de passe administrateur
 
-## 功能
+## Fonctionnalités
 
-
-### API 服务 
-基本实现了PC端基础的接口。支持Personal版本接口，可以通过配置文件`rustdesk.personal`或环境变量`RUSTDESK_API_RUSTDESK_PERSONAL`来控制是否启用
+### Service API
+L’API de base du client PC est implémentée. La version personnelle est prise en charge et peut être activée via le fichier `rustdesk.personal` ou la variable d’environnement `RUSTDESK_API_RUSTDESK_PERSONAL`.
 
 <table>
     <tr>
-      <td width="50%" align="center" colspan="2"><b>登录</b></td>
+      <td width="50%" align="center" colspan="2"><b>Connexion</b></td>
     </tr>
     <tr>
         <td width="50%" align="center" colspan="2"><img src="docs/pc_login.png"></td>
     </tr>
      <tr>
-      <td width="50%" align="center"><b>地址簿</b></td>
-      <td width="50%" align="center"><b>群组</b></td>
+      <td width="50%" align="center"><b>Carnet d’adresses</b></td>
+      <td width="50%" align="center"><b>Groupes</b></td>
     </tr>
     <tr>
         <td width="50%" align="center"><img src="docs/pc_ab.png"></td>
@@ -80,141 +76,139 @@
     </tr>
 </table>
 
-### Web Admin:
+### Web Admin :
 
-* 使用前后端分离，提供用户友好的管理界面，主要用来管理和展示。前端代码在[rustdesk-api-web](https://github.com/lejianwen/rustdesk-api-web)
+* Le projet utilise une séparation front/back pour offrir une interface d’administration conviviale, principalement pour la gestion et l’affichage. Le code du front est dans [rustdesk-api-web](https://github.com/lejianwen/rustdesk-api-web).
 
-* 后台访问地址是`http://<your server>[:port]/_admin/`
-* 初次安装管理员为用户名为`admin`，密码将在控制台打印，可以通过[命令行](#CLI)更改密码
+* L’adresse d’accès au panneau d’administration est `http://<votre serveur>[:port]/_admin/`.
+* Lors de la première installation, l’administrateur est nommé `admin` et le mot de passe est affiché dans la console. Il peut être modifié via la [ligne de commande](#CLI).
 
   ![img.png](./docs/init_admin_pwd.png)
 
-1. 管理员界面
+1. Interface d’administration
    ![web_admin](docs/web_admin.png)
-2. 普通用户界面
+2. Interface utilisateur standard
    ![web_user](docs/web_admin_user.png)
 
-3. 每个用户可以多个地址簿，也可以将地址簿共享给其他用户
-4. 分组可以自定义，方便管理，暂时支持两种类型: `共享组` 和 `普通组`
-5. 可以直接打开webclient，方便使用；也可以分享给游客，游客可以直接通过webclient远程到设备
-6. Oauth,支持了`Github`, `Google` 以及 `OIDC`, 需要创建一个`OAuth App`，然后配置到后台
-    - 对于`Google` 和 `Github`, `Issuer` 和 `Scopes`不需要填写.
-    - 对于`OIDC`, `Issuer`是必须的。`Scopes`是可选的，默认为 `openid,profile,email`. 确保可以获取 `sub`,`email` 和`preferred_username`
-    - `github oauth app`在`Settings`->`Developer settings`->`OAuth Apps`->`New OAuth App`
-      中创建,地址 [https://github.com/settings/developers](https://github.com/settings/developers)
-    - `Authorization callback URL`填写`http://<your server[:port]>/api/oidc/callback`
-      ，比如`http://127.0.0.1:21114/api/oidc/callback`
-7. 登录日志
-8. 链接日志
-9. 文件传输日志
-10. server控制
+3. Chaque utilisateur peut avoir plusieurs carnets d’adresses et les partager avec d’autres utilisateurs.
+4. Les groupes sont personnalisables. Deux types sont actuellement supportés : `groupe partagé` et `groupe normal`.
+5. Il est possible d’ouvrir directement le client web, ou de le partager à des invités qui peuvent accéder à distance aux postes via le client web.
+6. OAuth : prise en charge de `GitHub`, `Google` et `OIDC`. Il faut créer une `OAuth App` puis la configurer dans le panneau d’administration.
+    - Pour `Google` et `GitHub`, `Issuer` et `Scopes` ne sont pas requis.
+    - Pour `OIDC`, `Issuer` est obligatoire. `Scopes` est optionnel et par défaut `openid,profile,email`. Vérifiez que l’application a bien accès à `sub`, `email` et `preferred_username`.
+    - La `GitHub OAuth App` est créée dans `Settings` -> `Developer settings` -> `OAuth Apps` -> `New OAuth App`.
+      Voir : [https://github.com/settings/developers](https://github.com/settings/developers)
+    - Définir l’URL de callback : `http://<votre serveur[:port]>/api/oidc/callback`
+      par exemple `http://127.0.0.1:21114/api/oidc/callback`
+7. Journaux de connexion
+8. Journaux de liaison/connexion
+9. Journaux de transfert de fichiers
+10. Contrôle du serveur
 
-  - `简易模式`,已经界面化了一些简单的指令，可以直接在后台执行
+  - `Mode simple` : certaines commandes sont rendues conviviales et peuvent être exécutées directement depuis le panneau d’administration.
     ![rustdesk_command_simple](./docs/rustdesk_command_simple.png)
 
-  - `高级模式`,直接在后台执行指令
-      * 可以官方指令
-      * 可以添加自定义指令
-      * 可以执行自定义指令
+  - `Mode avancé` : les commandes peuvent être exécutées directement depuis le back-office.
+      * Commandes officielles prises en charge
+      * Ajout de commandes personnalisées
+      * Exécution de commandes personnalisées
 
- 
-11. **LDAP 支持**, 当在API Server上设置了LDAP(已测试AD和LDAP),可以通过LDAP中的用户信息进行登录 https://github.com/lejianwen/rustdesk-api/issues/114 ,如果LDAP验证失败，返回本地用户
+11. **Support LDAP** : si LDAP est configuré sur le serveur API (AD et LDAP testés), les utilisateurs peuvent se connecter via leurs données LDAP. Voir : https://github.com/lejianwen/rustdesk-api/issues/114. En cas d’échec LDAP, l’authentification revient à l’utilisateur local.
 
-### Web Client:
+### Client Web :
 
-1. 如果已经登录了后台，web client将自动直接登录
-2. 如果没登录后台，点击右上角登录即可，api server已经自动配置好了
-3. 登录后，会自动同步ID服务器和KEY
-4. 登录后，会将地址簿自动保存到web client中，方便使用
+1. Si vous êtes déjà connecté au panneau d’administration, le client web se connecte automatiquement.
+2. Si vous n’êtes pas connecté, cliquez sur le bouton de connexion en haut à droite ; le serveur API est déjà configuré automatiquement.
+3. Après la connexion, le serveur ID et la clé sont synchronisés automatiquement.
+4. Après la connexion, le carnet d’adresses est enregistré automatiquement dans le client web pour faciliter l’utilisation.
 
+### Documentation automatisée :
+L’API est documentée via Swag pour faciliter la compréhension et l’utilisation de l’API par les développeurs.
 
-### 自动化文档: 使用 Swag 生成 API 文档，方便开发者理解和使用 API。
-
-1. 后台文档 `<youer server[:port]>/admin/swagger/index.html`
-2. PC端文档 `<youer server[:port]>/swagger/index.html`
+1. Documentation du back-office : `<votre serveur[:port]>/admin/swagger/index.html`
+2. Documentation côté PC : `<votre serveur[:port]>/swagger/index.html`
    ![api_swag](docs/api_swag.png)
 
 ### CLI
 
 ```bash
-# 查看帮助
+# afficher l’aide
 ./apimain -h
 ```
 
-#### 重置管理员密码
+#### Réinitialiser le mot de passe administrateur
 ```bash
 ./apimain reset-admin-pwd <pwd>
 ```
 
-## 安装与运行
+## Installation et exécution
 
-### 相关配置
+### Configuration associée
 
-* [配置文件](./conf/config.yaml)
-* 参考`conf/config.yaml`配置文件，修改相关配置。
-* 如果`gorm.type`是`sqlite`，则不需要配置mysql相关配置。
-* 语言如果不设置默认为`zh-CN`
+* [Fichier de configuration](./conf/config.yaml)
+* Modifier la configuration dans `conf/config.yaml`.
+* Si `gorm.type` vaut `sqlite`, la configuration MySQL n’est pas nécessaire.
+* Si la langue n’est pas définie, la valeur par défaut est `zh-CN`.
 
-### 环境变量
-环境变量和配置文件`conf/config.yaml`中的配置一一对应，变量名前缀是`RUSTDESK_API`
-下面表格并未全部列出，可以参考`conf/config.yaml`中的配置。
+### Variables d’environnement
+Les variables d’environnement correspondent une par une aux configurations du fichier `conf/config.yaml`. Le préfixe est `RUSTDESK_API`.
+Le tableau ci-dessous n’est pas exhaustif. Consultez le fichier `conf/config.yaml` pour le détail complet.
 
-| 变量名                                                    | 说明                                                                             | 示例                           |
-|--------------------------------------------------------|--------------------------------------------------------------------------------|------------------------------|
-| TZ                                                     | 时区                                                                             | Asia/Shanghai                |
-| RUSTDESK_API_LANG                                      | 语言                                                                             | `en`,`zh-CN`                 |
-| RUSTDESK_API_APP_WEB_CLIENT                            | 是否启用web-client; 1:启用,0:不启用; 默认启用                                               | 1                            |
-| RUSTDESK_API_APP_REGISTER                              | 是否开启注册; `true`, `false`  默认`false`                                             | `false`                      |
-| RUSTDESK_API_APP_SHOW_SWAGGER                          | 是否可见swagger文档;`1`显示，`0`不显示，默认`0`不显示                                            | `1`                          |
-| RUSTDESK_API_APP_TOKEN_EXPIRE                          | token有效时长                                                                      | `168h`                       |
-| RUSTDESK_API_APP_DISABLE_PWD_LOGIN                     | 是否禁用密码登录;  `true`, `false`  默认`false`                                          | `false`                      |
-| RUSTDESK_API_APP_REGISTER_STATUS                       | 注册用户默认状态; 1 启用，2 禁用, 默认 1                                                      | `1`                          |
-| RUSTDESK_API_APP_CAPTCHA_THRESHOLD                     | 验证码触发次数; -1 不启用， 0 一直启用， >0 登录错误次数后启用 ;默认 `3`                                  | `3`                          |
-| RUSTDESK_API_APP_BAN_THRESHOLD                         | 封禁IP触发次数; 0 不启用, >0 登录错误次数后封禁IP; 默认 `0`                                        | `0`                          |
-| -----ADMIN配置-----                                      | ----------                                                                     | ----------                   |
-| RUSTDESK_API_ADMIN_TITLE                               | 后台标题                                                                           | `RustDesk Api Admin`         |
-| RUSTDESK_API_ADMIN_HELLO                               | 后台欢迎语，可以使用`html`                                                               |                              |
-| RUSTDESK_API_ADMIN_HELLO_FILE                          | 后台欢迎语文件，如果内容多，使用文件更方便。<br>会覆盖`RUSTDESK_API_ADMIN_HELLO`                        | `./conf/admin/hello.html`    |
-| -----GIN配置-----                                        | ----------                                                                     | ----------                   |
-| RUSTDESK_API_GIN_TRUST_PROXY                           | 信任的代理IP列表，以`,`分割，默认信任所有                                                        | 192.168.1.2,192.168.1.3      |
-| -----GORM配置-----                                       | ----------                                                                     | ---------------------------  |
-| RUSTDESK_API_GORM_TYPE                                 | 数据库类型sqlite或者mysql，默认sqlite                                                    | sqlite                       |
-| RUSTDESK_API_GORM_MAX_IDLE_CONNS                       | 数据库最大空闲连接数                                                                     | 10                           |
-| RUSTDESK_API_GORM_MAX_OPEN_CONNS                       | 数据库最大打开连接数                                                                     | 100                          |
-| RUSTDESK_API_RUSTDESK_PERSONAL                         | 是否启用个人版API， 1:启用,0:不启用； 默认启用                                                   | 1                            |
-| -----MYSQL配置-----                                      | ----------                                                                     | ----------                   |
-| RUSTDESK_API_MYSQL_USERNAME                            | mysql用户名                                                                       | root                         |
-| RUSTDESK_API_MYSQL_PASSWORD                            | mysql密码                                                                        | 111111                       |
-| RUSTDESK_API_MYSQL_ADDR                                | mysql地址                                                                        | 192.168.1.66:3306            |
-| RUSTDESK_API_MYSQL_DBNAME                              | mysql数据库名                                                                      | rustdesk                     |
-| RUSTDESK_API_MYSQL_TLS                             | 是否启用TLS, 可选值: `true`, `false`, `skip-verify`, `custom` | `false`                      |
-| -----RUSTDESK配置-----                                   | ----------                                                                     | ----------                   |
-| RUSTDESK_API_RUSTDESK_ID_SERVER                        | Rustdesk的id服务器地址                                                               | 192.168.1.66:21116           |
-| RUSTDESK_API_RUSTDESK_RELAY_SERVER                     | Rustdesk的relay服务器地址                                                            | 192.168.1.66:21117           |
-| RUSTDESK_API_RUSTDESK_API_SERVER                       | Rustdesk的api服务器地址                                                              | http://192.168.1.66:21114    |
-| RUSTDESK_API_RUSTDESK_KEY                              | Rustdesk的key                                                                   | 123456789                    |
-| RUSTDESK_API_RUSTDESK_KEY_FILE                         | Rustdesk存放key的文件                                                               | `./conf/data/id_ed25519.pub` |
-| RUSTDESK_API_RUSTDESK_WEBCLIENT<br/>_MAGIC_QUERYONLINE | Web client v2 中是否启用新的在线状态查询方法; `1`:启用,`0`:不启用,默认不启用                            | `0`                          |
-| RUSTDESK_API_RUSTDESK_WS_HOST                          | 自定义Websocket Host                                                              | `wss://192.168.1.123:1234`   |
-| ----PROXY配置-----                                       | ----------                                                                     | ----------                   |
-| RUSTDESK_API_PROXY_ENABLE                              | 是否启用代理:`false`, `true`                                                         | `false`                      |
-| RUSTDESK_API_PROXY_HOST                                | 代理地址                                                                           | `http://127.0.0.1:1080`      |
-| ----JWT配置----                                          | --------                                                                       | --------                     |
-| RUSTDESK_API_JWT_KEY                                   | 自定义JWT KEY,为空则不启用JWT<br/>如果没使用`lejianwen/rustdesk-server`中的`MUST_LOGIN`，建议设置为空 |                              |
-| RUSTDESK_API_JWT_EXPIRE_DURATION                       | JWT有效时间                                                                        | `168h`                       |
+| Variable | Description | Exemple |
+|---|---|---|
+| TZ | Fuseau horaire | Asia/Shanghai |
+| RUSTDESK_API_LANG | Langue | `en`, `zh-CN` |
+| RUSTDESK_API_APP_WEB_CLIENT | Activer/désactiver le client web ; 1 = activé, 0 = désactivé ; actif par défaut | 1 |
+| RUSTDESK_API_APP_REGISTER | Inscription activée ; `true`, `false` ; défaut `false` | `false` |
+| RUSTDESK_API_APP_SHOW_SWAGGER | Afficher Swagger ; `1` = oui, `0` = non ; défaut `0` | `1` |
+| RUSTDESK_API_APP_TOKEN_EXPIRE | Durée de validité du token | `168h` |
+| RUSTDESK_API_APP_DISABLE_PWD_LOGIN | Désactiver la connexion par mot de passe ; `true`, `false` ; défaut `false` | `false` |
+| RUSTDESK_API_APP_REGISTER_STATUS | Statut par défaut des utilisateurs inscrits ; 1 = activé, 2 = désactivé, défaut 1 | `1` |
+| RUSTDESK_API_APP_CAPTCHA_THRESHOLD | Seuil captcha ; -1 = désactivé, 0 = toujours, >0 = activé après N échecs ; défaut `3` | `3` |
+| RUSTDESK_API_APP_BAN_THRESHOLD | Seuil de bannissement IP ; 0 = désactivé, >0 = bannir après N échecs ; défaut `0` | `0` |
+| ----- CONFIG ADMIN ----- | --- | --- |
+| RUSTDESK_API_ADMIN_TITLE | Titre du panneau d’administration | `RustDesk Api Admin` |
+| RUSTDESK_API_ADMIN_HELLO | Message d’accueil admin, accepte du HTML |  |
+| RUSTDESK_API_ADMIN_HELLO_FILE | Fichier du message d’accueil, le fichier remplace la variable `RUSTDESK_API_ADMIN_HELLO` | `./conf/admin/hello.html` |
+| ----- CONFIG GIN ----- | --- | --- |
+| RUSTDESK_API_GIN_TRUST_PROXY | IP proxy de confiance, séparées par des virgules ; par défaut accepte tout | 192.168.1.2,192.168.1.3 |
+| ----- CONFIG GORM ----- | --- | --- |
+| RUSTDESK_API_GORM_TYPE | Type de base de données (`sqlite` ou `mysql`), défaut `sqlite` | sqlite |
+| RUSTDESK_API_GORM_MAX_IDLE_CONNS | Nombre maximum de connexions inactives | 10 |
+| RUSTDESK_API_GORM_MAX_OPEN_CONNS | Nombre maximum de connexions ouvertes | 100 |
+| RUSTDESK_API_RUSTDESK_PERSONAL | Activer l’API personnelle ; 1 = activée, 0 = désactivée ; défaut activée | 1 |
+| ----- CONFIG MYSQL ----- | --- | --- |
+| RUSTDESK_API_MYSQL_USERNAME | Nom d’utilisateur MySQL | root |
+| RUSTDESK_API_MYSQL_PASSWORD | Mot de passe MySQL | 111111 |
+| RUSTDESK_API_MYSQL_ADDR | Adresse MySQL | 192.168.1.66:3306 |
+| RUSTDESK_API_MYSQL_DBNAME | Nom de la base MySQL | rustdesk |
+| RUSTDESK_API_MYSQL_TLS | Activer TLS ; valeurs possibles : `true`, `false`, `skip-verify`, `custom` | `false` |
+| ----- CONFIG RUSTDESK ----- | --- | --- |
+| RUSTDESK_API_RUSTDESK_ID_SERVER | Adresse du serveur ID RustDesk | 192.168.1.66:21116 |
+| RUSTDESK_API_RUSTDESK_RELAY_SERVER | Adresse du relay RustDesk | 192.168.1.66:21117 |
+| RUSTDESK_API_RUSTDESK_API_SERVER | Adresse du serveur API RustDesk | http://192.168.1.66:21114 |
+| RUSTDESK_API_RUSTDESK_KEY | Clé RustDesk | 123456789 |
+| RUSTDESK_API_RUSTDESK_KEY_FILE | Fichier contenant la clé RustDesk | `./conf/data/id_ed25519.pub` |
+| RUSTDESK_API_RUSTDESK_WEBCLIENT<br/>_MAGIC_QUERYONLINE | Activer la nouvelle méthode de requête de statut en ligne dans le client web v2 ; `1` = activée, `0` = désactivée, défaut `0` | `0` |
+| RUSTDESK_API_RUSTDESK_WS_HOST | Host WebSocket personnalisé | `wss://192.168.1.123:1234` |
+| ---- PROXY ----- | --- | --- |
+| RUSTDESK_API_PROXY_ENABLE | Activer le proxy : `false`, `true` | `false` |
+| RUSTDESK_API_PROXY_HOST | Adresse du proxy | `http://127.0.0.1:1080` |
+| ---- JWT ---- | --- | --- |
+| RUSTDESK_API_JWT_KEY | Clé JWT personnalisée ; vide = JWT désactivé. Si vous n’utilisez pas `MUST_LOGIN` du serveur `lejianwen/rustdesk-server`, il est conseillé de laisser vide |  |
+| RUSTDESK_API_JWT_EXPIRE_DURATION | Durée de validité JWT | `168h` |
 
+### Exécution
 
-### 运行
+#### Docker
 
-#### docker运行
-
-1. 直接docker运行,配置可以通过挂载配置文件`/app/conf/config.yaml`来修改,或者通过环境变量覆盖配置文件中的配置
+1. Exécution directe avec Docker. La configuration peut être modifiée en montant le fichier `/app/conf/config.yaml`, ou en remplaçant les valeurs via des variables d’environnement.
 
     ```bash
     docker run -d --name rustdesk-api -p 21114:21114 \
     -v /data/rustdesk/api:/app/data \
     -e TZ=Asia/Shanghai \
-    -e RUSTDESK_API_LANG=zh-CN \
+    -e RUSTDESK_API_LANG=fr \
     -e RUSTDESK_API_RUSTDESK_ID_SERVER=192.168.1.66:21116 \
     -e RUSTDESK_API_RUSTDESK_RELAY_SERVER=192.168.1.66:21117 \
     -e RUSTDESK_API_RUSTDESK_API_SERVER=http://192.168.1.66:21114 \
@@ -222,29 +216,29 @@
     lejianwen/rustdesk-api
     ```
 
-2. 使用`docker compose`，参考[WIKI](https://github.com/lejianwen/rustdesk-api/wiki)
+2. Utiliser `docker compose` : voir [WIKI](https://github.com/lejianwen/rustdesk-api/wiki)
 
-#### 下载release直接运行
+#### Lancer depuis le binaire release
 
-[下载地址](https://github.com/lejianwen/rustdesk-api/releases)
+[Télécharger la release](https://github.com/lejianwen/rustdesk-api/releases)
 
-#### 源码安装
+#### Installation depuis le code source
 
-1. 克隆仓库
+1. Cloner le dépôt
    ```bash
    git clone https://github.com/lejianwen/rustdesk-api.git
    cd rustdesk-api
    ```
 
-2. 安装依赖
+2. Installer les dépendances
 
     ```bash
     go mod tidy
-    #安装swag，如果不需要生成文档，可以不安装
+    # installer swag si vous voulez générer la documentation ; sinon, vous pouvez l’ignorer
     go install github.com/swaggo/swag/cmd/swag@latest
     ```
 
-3. 编译后台前端，前端代码在[rustdesk-api-web](https://github.com/lejianwen/rustdesk-api-web)中
+3. Compiler le front d’administration. Le code du front est dans [rustdesk-api-web](https://github.com/lejianwen/rustdesk-api-web).
    ```bash
    cd resources
    mkdir -p admin
@@ -254,30 +248,27 @@
    npm run build
    cp -ar dist/* ../admin/
    ```
-4. 运行
+4. Exécution
     ```bash
-    #直接运行
+    # exécution directe
     go run cmd/apimain.go
-    #或者使用generate_api.go生成api并运行
+    # ou générer l’API puis exécuter
     go generate generate_api.go
     ```
-   > 注意：使用 `go run` 或编译后的二进制时，当前目录下必须存在 `conf` 和 `resources`
-   > 目录。如果在其他目录运行，可通过 `-c` 和环境变量
-   > `RUSTDESK_API_GIN_RESOURCES_PATH` 指定绝对路径，例如：
+   > Note : lors de l’utilisation de `go run` ou du binaire compilé, les dossiers `conf` et `resources` doivent être présents dans le répertoire courant.
+   > Si vous exécutez ailleurs, vous pouvez spécifier un chemin absolu avec `-c` et la variable d’environnement `RUSTDESK_API_GIN_RESOURCES_PATH`, par exemple :
    > ```bash
    > RUSTDESK_API_GIN_RESOURCES_PATH=/opt/rustdesk-api/resources ./apimain -c /opt/rustdesk-api/conf/config.yaml
    > ```
-5. 编译，如果想自己编译,先cd到项目根目录，然后windows下直接运行`build.bat`,linux下运行`build.sh`,编译后会在`release`
-   目录下生成对应的可执行文件。直接运行编译后的可执行文件即可。
+5. Compiler : si vous souhaitez compiler vous-même, placez-vous à la racine du projet. Sous Windows, exécutez `build.bat`; sous Linux, exécutez `build.sh`. L’exécutable généré se trouve dans le dossier `release`.
 
-6. 打开浏览器访问`http://<your server[:port]>/_admin/`，默认用户名密码为`admin`，请及时更改密码。
+6. Ouvrez le navigateur sur `http://<votre serveur[:port]>/_admin/`. Le nom d’utilisateur et le mot de passe par défaut sont `admin`. Changez-le rapidement.
 
+#### Exécution avec l’image `lejianwen/server-s6`
 
-#### 使用`lejianwen/server-s6`镜像运行
-
-- 已解决链接超时问题
-- 可以强制登录后才能发起链接
-- github https://github.com/lejianwen/rustdesk-server
+- Problème de délai d’attente de connexion corrigé
+- Peut forcer la connexion avant de lancer une session
+- GitHub : https://github.com/lejianwen/rustdesk-server
 
 ```yaml
  networks:
@@ -303,33 +294,30 @@
        - RUSTDESK_API_RUSTDESK_RELAY_SERVER=<relay_server[:21117]>
        - RUSTDESK_API_RUSTDESK_API_SERVER=http://<api_server[:21114]>
        - RUSTDESK_API_KEY_FILE=/data/id_ed25519.pub
-       - RUSTDESK_API_JWT_KEY=xxxxxx # jwt key
+       - RUSTDESK_API_JWT_KEY=xxxxxx # clé JWT
      volumes:
        - /data/rustdesk/server:/data
-       - /data/rustdesk/api:/app/data #将数据库挂载
+       - /data/rustdesk/api:/app/data # monter la base de données
      networks:
        - rustdesk-net
      restart: unless-stopped
-       
 ```
 
-
-## 其他
+## Divers
 
 - [WIKI](https://github.com/lejianwen/rustdesk-api/wiki)
-- [链接超时问题](https://github.com/lejianwen/rustdesk-api/issues/92)
-- [修改客户端ID](https://github.com/abdullah-erturk/RustDesk-ID-Changer)
-- [webclient来源](https://hub.docker.com/r/keyurbhole/flutter_web_desk)
+- [Problème de délai d’attente de connexion](https://github.com/lejianwen/rustdesk-api/issues/92)
+- [Modifier l’ID du client](https://github.com/abdullah-erturk/RustDesk-ID-Changer)
+- [Source du client web](https://hub.docker.com/r/keyurbhole/flutter_web_desk)
 
+## Remerciements
 
-## 鸣谢
-
-感谢所有做过贡献的人!
+Merci à tous ceux qui ont contribué !
 
 <a href="https://github.com/lejianwen/rustdesk-api/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=lejianwen/rustdesk-api" />
 </a>
 
-## 感谢你的支持！如果这个项目对你有帮助，请点个⭐️鼓励一下，谢谢！
+## Merci pour votre soutien ! Si ce projet vous est utile, donnez une étoile ⭐️ pour encourager le projet.
 
 [lejianwen/rustdesk-server]: https://github.com/lejianwen/rustdesk-server
