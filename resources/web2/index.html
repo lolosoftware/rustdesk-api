@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>RustDesk Web Client</title>
+  <script>
+    (() => {
+      const hash = window.location.hash;
+      let targetHash = hash || '#/';
+
+      // Keep old V2 bookmarks working: #/peer-id -> #/?id=peer-id.
+      // Query-style hashes such as #/?share_token=... already use the
+      // format expected by the bundled web client and can pass through.
+      if (hash.startsWith('#/') && !hash.startsWith('#/?')) {
+        const encodedPeerId = hash.slice(2);
+        let peerId = encodedPeerId;
+        try {
+          peerId = decodeURIComponent(encodedPeerId);
+        } catch (_) {
+          // Preserve a malformed legacy value instead of blocking redirect.
+        }
+        targetHash = `#/?id=${encodeURIComponent(peerId)}`;
+      }
+
+      const target = new URL('../webclient/', window.location.href);
+      target.hash = targetHash.slice(1);
+      window.location.replace(target.toString());
+    })();
+  </script>
+</head>
+<body>
+  <noscript>
+    <a href="../webclient/">Open RustDesk Web Client</a>
+  </noscript>
+</body>
+</html>

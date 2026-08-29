@@ -34,28 +34,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.5'
-          channel: stable
-
-      - name: Build RustDesk Web Client V2
-        shell: bash
-        run: |
-          rm -rf rustdesk-web-v2 resources/web2
-          git clone --depth 1 https://github.com/rustdesk/rustdesk.git rustdesk-web-v2
-          cd rustdesk-web-v2
-          git fetch --depth 1 origin 03a7fc5992069cc5bc9f7c36b872483dddf4f472
-          git checkout --detach 03a7fc5992069cc5bc9f7c36b872483dddf4f472
-          cd flutter
-          flutter create --platforms web --project-name rustdesk_web_client .
-          flutter pub get
-          flutter build web --release --base-href /webclient2/
-          cd ../..
-          mkdir -p resources/web2
-          cp -R rustdesk-web-v2/flutter/build/web/. resources/web2/
-
       - name: Build administration frontend
         shell: bash
         run: |

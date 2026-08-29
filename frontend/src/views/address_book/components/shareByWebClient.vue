@@ -45,7 +45,7 @@
 <script setup>
   import { T } from '@/utils/i18n'
   import { computed, reactive, ref, watch } from 'vue'
-  import { getV2ShareUrl } from '@/utils/webclient'
+  import { getWebClientShareUrl } from '@/utils/webclient'
   import * as sha256 from 'fast-sha256'
   import { shareByWebClient } from '@/api/address_book'
   import { CopyDocument } from '@element-plus/icons'
@@ -120,7 +120,7 @@
     }*/
     const res = await shareByWebClient(_formData).catch(_ => false)
     if (res) {
-      link.value = getV2ShareUrl(res.data.share_token)
+      link.value = getWebClientShareUrl(res.data.share_token)
       emits('success')
     }
     loading.value = false
