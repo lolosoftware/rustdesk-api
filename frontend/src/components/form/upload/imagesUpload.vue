@@ -25,7 +25,7 @@
               <el-icon class="default-icon">
                 <plus/>
               </el-icon>
-              <div class="drag-tips">点击上传<span v-if="drag">或直接拖入文件</span></div>
+              <div class="drag-tips">Cliquez pour téléverser<span v-if="drag"> ou déposez directement le fichier</span></div>
             </div>
           </slot>
         </div>
@@ -173,7 +173,7 @@
       }
 
       function onExceed () {
-        ElMessage.error('超出数量限制')
+        ElMessage.error('La limite de fichiers est dépassée')
       }
 
       return {

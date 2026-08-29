@@ -447,7 +447,7 @@
     return false
   }
   const toImport = () => {
-    ElMessage.warning('暂未实现')
+    ElMessage.warning('Cette fonction n’est pas encore disponible')
   }
 
   const ABFormVisible = ref(false)

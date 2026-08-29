@@ -1,12 +1,12 @@
 <template>
   <el-form-item ref="formAddress" :label="label" :prop="prop">
-    <el-select v-model="currentProvince" clearable placeholder="省" @change="changeProvince">
+    <el-select v-model="currentProvince" clearable placeholder="Région" @change="changeProvince">
       <el-option v-for="(_, name) in pca" :key="name" :label="name" :value="name"/>
     </el-select>
-    <el-select v-model="currentCity" clearable placeholder="市" @change="changeCity">
+    <el-select v-model="currentCity" clearable placeholder="Ville" @change="changeCity">
       <el-option v-for="(_, name) in cities" :key="name" :label="name" :value="name"/>
     </el-select>
-    <el-select v-model="currentCounty" clearable placeholder="区" @change="changeCounty">
+    <el-select v-model="currentCounty" clearable placeholder="Arrondissement" @change="changeCounty">
       <el-option v-for="item in counties" :key="item" :label="item" :value="item"/>
     </el-select>
   </el-form-item>
@@ -25,7 +25,7 @@
       },
       label: {
         type: String,
-        default: '省/市/区',
+        default: 'Région / ville / arrondissement',
       },
       province: {
         type: String,

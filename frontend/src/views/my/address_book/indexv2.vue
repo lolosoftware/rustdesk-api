@@ -6,7 +6,7 @@
         <el-option v-for="c in collectionListRes.list" :key="c.id" :label="c.name" :value="c.id"></el-option>
       </el-select>
       <div class="aside-tags">
-        <div class="top" style="width: 100%">标签</div>
+        <div class="top" style="width: 100%">Étiquette</div>
         <div v-for="t in tagListRes.list"
              :key="t.id" class="tag"
              :class="{checked: checkedTags.includes(t.name)}"
@@ -135,13 +135,13 @@
         <!-- <el-form-item label="强制中继" prop="forceAlwaysRelay" required>
                  <el-switch v-model="formData.forceAlwaysRelay"></el-switch>
                </el-form-item>
-          <el-form-item label="在线" prop="online">
+          <el-form-item label="En ligne" prop="online">
                  <el-switch v-model="formData.online"></el-switch>
                </el-form-item>
-               <el-form-item label="rdp端口" prop="rdpPort">
+              <el-form-item label="Port RDP" prop="rdpPort">
                  <el-input v-model="formData.rdpPort"></el-input>
                </el-form-item>
-               <el-form-item label="rdp用户名" prop="rdpUsername">
+              <el-form-item label="Nom d’utilisateur RDP" prop="rdpUsername">
                  <el-input v-model="formData.rdpUsername"></el-input>
                </el-form-item>
                <el-form-item label="同一服务器" prop="sameServer">
