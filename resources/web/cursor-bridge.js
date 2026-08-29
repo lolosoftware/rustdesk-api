@@ -1,16 +1,27 @@
 (() => {
   const style = document.createElement('style');
   style.textContent = `
+html.rustdesk-cursor-fallback,
+html.rustdesk-cursor-fallback * {
+  cursor: default !important;
+}
 html.rustdesk-remote-cursor,
 html.rustdesk-remote-cursor * {
   cursor: var(--rustdesk-remote-cursor) !important;
 }`;
   document.head.appendChild(style);
+  document.documentElement.classList.add('rustdesk-cursor-fallback');
+  window.__rustdeskCursorBridgeStatus = {
+    installed: false,
+    cursorCommands: 0,
+    customCursorActive: false,
+  };
 
   const resetCursor = () => {
     const root = document.documentElement;
     root.classList.remove('rustdesk-remote-cursor');
     root.style.removeProperty('--rustdesk-remote-cursor');
+    window.__rustdeskCursorBridgeStatus.customCursorActive = false;
   };
 
   const applyCursor = (value) => {
@@ -36,6 +47,7 @@ html.rustdesk-remote-cursor * {
         `url("${url}") ${hotx} ${hoty}, auto`
       );
       root.classList.add('rustdesk-remote-cursor');
+      window.__rustdeskCursorBridgeStatus.customCursorActive = true;
     } catch (error) {
       console.error('Failed to apply the remote cursor', error);
       resetCursor();
@@ -57,6 +69,7 @@ html.rustdesk-remote-cursor * {
 
     function bridgedSetByName (name, value) {
       if (name === 'cursor') {
+        window.__rustdeskCursorBridgeStatus.cursorCommands += 1;
         applyCursor(value);
         return;
       }
@@ -67,6 +80,8 @@ html.rustdesk-remote-cursor * {
       value: true,
     });
     window.setByName = bridgedSetByName;
+    window.__rustdeskCursorBridgeStatus.installed = true;
+    console.info('RustDesk cursor bridge installed');
   };
 
   installBridge();
