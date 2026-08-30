@@ -1,76 +1,134 @@
 package service
 
 import (
-	"crypto/hmac"
-	"crypto/rand"
-	"crypto/sha1"
-	"encoding/base32"
-	"fmt"
+	"bytes"
+	"encoding/base64"
+	"errors"
+	"image/png"
 	"strings"
 	"time"
 
 	"github.com/lejianwen/rustdesk-api/v2/model"
+	"github.com/pquerna/otp/totp"
 )
 
-const otpWindow = 1
+var (
+	ErrOTPAlreadyEnabled = errors.New("OTP is already enabled")
+	ErrOTPNotConfigured  = errors.New("OTP is not configured")
+	ErrOTPInvalidCode    = errors.New("invalid OTP code")
+)
+
+type OTPEnrollment struct {
+	Secret          string `json:"secret"`
+	ProvisioningURI string `json:"provisioning_uri"`
+	QRCode          string `json:"qr_code"`
+}
 
 func GenerateOTPSecret() string {
-	b := make([]byte, 20)
-	if _, err := rand.Read(b); err != nil {
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "RustDesk API",
+		AccountName: "test",
+		SecretSize:  20,
+	})
+	if err != nil {
 		return ""
 	}
-	return strings.TrimSpace(base32.StdEncoding.EncodeToString(b))
+	return key.Secret()
 }
 
 func GenerateTOTPCode(secret string, t time.Time) string {
-	secret = strings.TrimSpace(secret)
-	if secret == "" {
+	code, err := totp.GenerateCode(strings.TrimSpace(secret), t)
+	if err != nil {
 		return ""
 	}
-	key, err := base32.StdEncoding.DecodeString(strings.ToUpper(secret))
-	if err != nil || len(key) == 0 {
-		return ""
-	}
-
-	counter := uint64(t.Unix() / 30)
-	msg := make([]byte, 8)
-	for i := 7; i >= 0; i-- {
-		msg[i] = byte(counter & 0xff)
-		counter >>= 8
-	}
-
-	hm := hmac.New(sha1.New, key)
-	_, _ = hm.Write(msg)
-	sum := hm.Sum(nil)
-	offset := int(sum[len(sum)-1] & 0x0f)
-	value := (int(sum[offset]&0x7f) << 24) |
-		(int(sum[offset+1]&0xff) << 16) |
-		(int(sum[offset+2]&0xff) << 8) |
-		(int(sum[offset+3] & 0xff))
-
-	code := value % 1000000
-	return fmt.Sprintf("%06d", code)
+	return code
 }
 
 func VerifyOTPCode(secret, code string) bool {
 	secret = strings.TrimSpace(secret)
 	code = strings.TrimSpace(code)
-	if secret == "" || code == "" {
+	if secret == "" || len(code) != 6 {
 		return false
 	}
-	if len(code) != 6 {
-		return false
-	}
-	for i := -otpWindow; i <= otpWindow; i++ {
-		if GenerateTOTPCode(secret, time.Now().Add(time.Duration(i)*30*time.Second)) == code {
-			return true
+	for _, digit := range code {
+		if digit < '0' || digit > '9' {
+			return false
 		}
 	}
-	return false
+	return totp.Validate(code, secret)
 }
 
-func (us *UserService) GenerateUserOTPSecret() string {
-	return GenerateOTPSecret()
+func (us *UserService) BeginUserOTPEnrollment(u *model.User) (*OTPEnrollment, error) {
+	if u == nil || u.Id == 0 {
+		return nil, ErrOTPNotConfigured
+	}
+	if u.OtpEnabled {
+		return nil, ErrOTPAlreadyEnabled
+	}
+
+	issuer := "RustDesk API"
+	if Config != nil && strings.TrimSpace(Config.Admin.Title) != "" {
+		issuer = strings.TrimSpace(Config.Admin.Title)
+	}
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      issuer,
+		AccountName: u.Username,
+		SecretSize:  20,
+	})
+	if err != nil {
+		return nil, err
+	}
+	image, err := key.Image(256, 256)
+	if err != nil {
+		return nil, err
+	}
+	var pngData bytes.Buffer
+	if err = png.Encode(&pngData, image); err != nil {
+		return nil, err
+	}
+
+	if err = DB.Model(&model.User{}).Where("id = ?", u.Id).Updates(map[string]interface{}{
+		"otp_enabled": false,
+		"otp_secret":  key.Secret(),
+	}).Error; err != nil {
+		return nil, err
+	}
+
+	return &OTPEnrollment{
+		Secret:          key.Secret(),
+		ProvisioningURI: key.URL(),
+		QRCode:          "data:image/png;base64," + base64.StdEncoding.EncodeToString(pngData.Bytes()),
+	}, nil
+}
+
+func (us *UserService) ConfirmUserOTP(u *model.User, code string) error {
+	if u == nil || u.Id == 0 || u.OtpEnabled || strings.TrimSpace(u.OtpSecret) == "" {
+		return ErrOTPNotConfigured
+	}
+	if !VerifyOTPCode(u.OtpSecret, code) {
+		return ErrOTPInvalidCode
+	}
+	return DB.Model(&model.User{}).Where("id = ?", u.Id).Update("otp_enabled", true).Error
+}
+
+func (us *UserService) DisableUserOTP(u *model.User, code string) error {
+	if u == nil || u.Id == 0 || !u.OtpEnabled || strings.TrimSpace(u.OtpSecret) == "" {
+		return ErrOTPNotConfigured
+	}
+	if !VerifyOTPCode(u.OtpSecret, code) {
+		return ErrOTPInvalidCode
+	}
+	return us.ResetUserOTP(u)
+}
+
+func (us *UserService) ResetUserOTP(u *model.User) error {
+	if u == nil || u.Id == 0 {
+		return ErrOTPNotConfigured
+	}
+	return DB.Model(&model.User{}).Where("id = ?", u.Id).Updates(map[string]interface{}{
+		"otp_enabled": false,
+		"otp_secret":  "",
+	}).Error
 }
 
 func (us *UserService) VerifyUserOTP(u *model.User, code string) bool {

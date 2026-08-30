@@ -68,6 +68,26 @@ export function changeCurPwd (data) {
   })
 }
 
+export function otpStatus () {
+  return request({ url: '/user/otp/status' })
+}
+
+export function otpSetup () {
+  return request({ url: '/user/otp/setup', method: 'post' })
+}
+
+export function otpConfirm (code) {
+  return request({ url: '/user/otp/confirm', method: 'post', data: { code } })
+}
+
+export function otpDisable (code) {
+  return request({ url: '/user/otp/disable', method: 'post', data: { code } })
+}
+
+export function otpReset (id) {
+  return request({ url: '/user/otp/reset', method: 'post', data: { id } })
+}
+
 export function myOauth () {
   return request({
     url: '/user/myOauth',

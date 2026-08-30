@@ -9,6 +9,7 @@ type LoginPayload struct {
 	Token      string   `json:"token"`
 	RouteNames []string `json:"route_names"`
 	Nickname   string   `json:"nickname"`
+	OtpEnabled bool     `json:"otp_enabled"`
 }
 
 func (lp *LoginPayload) FromUser(user *model.User) {
@@ -16,6 +17,7 @@ func (lp *LoginPayload) FromUser(user *model.User) {
 	lp.Email = user.Email
 	lp.Avatar = user.Avatar
 	lp.Nickname = user.Nickname
+	lp.OtpEnabled = user.OtpEnabled
 }
 
 type UserOauthItem struct {

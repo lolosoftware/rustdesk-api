@@ -260,6 +260,112 @@ func (ct *User) ChangeCurPwd(c *gin.Context) {
 	response.Success(c, nil)
 }
 
+// OTPStatus returns only the enrollment state. The secret is never returned
+// after activation.
+func (ct *User) OTPStatus(c *gin.Context) {
+	u := service.AllService.UserService.CurUser(c)
+	response.Success(c, gin.H{"enabled": u != nil && u.OtpEnabled})
+}
+
+// OTPSetup starts a new TOTP enrollment for the authenticated user. A new
+// secret is generated server-side and remains inactive until OTPConfirm.
+func (ct *User) OTPSetup(c *gin.Context) {
+	u := service.AllService.UserService.CurUser(c)
+	enrollment, err := service.AllService.UserService.BeginUserOTPEnrollment(u)
+	if err != nil {
+		if err == service.ErrOTPAlreadyEnabled {
+			response.Fail(c, 101, response.TranslateMsg(c, "OtpAlreadyEnabled"))
+			return
+		}
+		response.Fail(c, 101, response.TranslateMsg(c, "OperationFailed")+err.Error())
+		return
+	}
+	response.Success(c, enrollment)
+}
+
+// OTPConfirm activates TOTP only after a code from the newly enrolled
+// authenticator has been validated.
+func (ct *User) OTPConfirm(c *gin.Context) {
+	f := &admin.OTPCodeForm{}
+	if err := c.ShouldBindJSON(f); err != nil {
+		response.Fail(c, 101, response.TranslateMsg(c, "ParamsError")+err.Error())
+		return
+	}
+	if errList := global.Validator.ValidStruct(c, f); len(errList) > 0 {
+		response.Fail(c, 101, errList[0])
+		return
+	}
+	curUser := service.AllService.UserService.CurUser(c)
+	u := service.AllService.UserService.InfoById(curUser.Id)
+	if err := service.AllService.UserService.ConfirmUserOTP(u, f.Code); err != nil {
+		if err == service.ErrOTPInvalidCode || err == service.ErrOTPNotConfigured {
+			response.Fail(c, 101, response.TranslateMsg(c, "OtpCodeError"))
+			return
+		}
+		response.Fail(c, 101, response.TranslateMsg(c, "OperationFailed")+err.Error())
+		return
+	}
+	if token, ok := c.Get("token"); ok {
+		if tokenValue, valid := token.(string); valid {
+			_ = service.AllService.UserService.FlushOtherTokens(u, tokenValue)
+		}
+	}
+	response.Success(c, nil)
+}
+
+// OTPDisable requires a current TOTP code before removing the factor.
+func (ct *User) OTPDisable(c *gin.Context) {
+	f := &admin.OTPCodeForm{}
+	if err := c.ShouldBindJSON(f); err != nil {
+		response.Fail(c, 101, response.TranslateMsg(c, "ParamsError")+err.Error())
+		return
+	}
+	if errList := global.Validator.ValidStruct(c, f); len(errList) > 0 {
+		response.Fail(c, 101, errList[0])
+		return
+	}
+	u := service.AllService.UserService.CurUser(c)
+	if err := service.AllService.UserService.DisableUserOTP(u, f.Code); err != nil {
+		if err == service.ErrOTPInvalidCode || err == service.ErrOTPNotConfigured {
+			response.Fail(c, 101, response.TranslateMsg(c, "OtpCodeError"))
+			return
+		}
+		response.Fail(c, 101, response.TranslateMsg(c, "OperationFailed")+err.Error())
+		return
+	}
+	if token, ok := c.Get("token"); ok {
+		if tokenValue, valid := token.(string); valid {
+			_ = service.AllService.UserService.FlushOtherTokens(u, tokenValue)
+		}
+	}
+	response.Success(c, nil)
+}
+
+// OTPReset is an administrator recovery action for a user who has lost their
+// authenticator. It revokes all of that user's active sessions.
+func (ct *User) OTPReset(c *gin.Context) {
+	f := &admin.OTPResetForm{}
+	if err := c.ShouldBindJSON(f); err != nil {
+		response.Fail(c, 101, response.TranslateMsg(c, "ParamsError")+err.Error())
+		return
+	}
+	if errList := global.Validator.ValidStruct(c, f); len(errList) > 0 {
+		response.Fail(c, 101, errList[0])
+		return
+	}
+	u := service.AllService.UserService.InfoById(f.Id)
+	if u.Id == 0 {
+		response.Fail(c, 101, response.TranslateMsg(c, "ItemNotFound"))
+		return
+	}
+	if err := service.AllService.UserService.ResetUserOTP(u); err != nil {
+		response.Fail(c, 101, response.TranslateMsg(c, "OperationFailed")+err.Error())
+		return
+	}
+	_ = service.AllService.UserService.FlushToken(u)
+	response.Success(c, nil)
+}
+
 // MyOauth
 // @Tags 用户
 // @Summary 我的授权

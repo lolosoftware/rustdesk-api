@@ -531,5 +531,65 @@
   },
   "Remark": {
     "One": "Remark"
+  },
+  "AuthenticationCode": {
+    "One": "Authentication code"
+  },
+  "TwoFactorAuthentication": {
+    "One": "Two-factor authentication"
+  },
+  "Enabled": {
+    "One": "Enabled"
+  },
+  "Disabled": {
+    "One": "Disabled"
+  },
+  "Configure": {
+    "One": "Configure"
+  },
+  "Disable": {
+    "One": "Disable"
+  },
+  "ConfigureTwoFactorAuthentication": {
+    "One": "Configure two-factor authentication"
+  },
+  "ScanAuthenticatorQR": {
+    "One": "Scan this QR code with your authenticator app."
+  },
+  "AuthenticatorQRCode": {
+    "One": "OTP setup QR code"
+  },
+  "ManualAuthenticatorKey": {
+    "One": "Or enter this key manually:"
+  },
+  "Copy": {
+    "One": "Copy"
+  },
+  "Copied": {
+    "One": "Copied"
+  },
+  "EnterAuthenticatorCodeToConfirm": {
+    "One": "Enter the 6-digit code displayed by the app to confirm activation."
+  },
+  "EnterAuthenticatorCodeToDisable": {
+    "One": "Enter your current authentication code to disable protection."
+  },
+  "DisableTwoFactorAuthentication": {
+    "One": "Disable two-factor authentication"
+  },
+  "AuthenticationCodeMustHaveSixDigits": {
+    "One": "The code must contain exactly 6 digits."
+  },
+  "TwoFactorAuthenticationEnabled": {
+    "One": "Two-factor authentication is enabled."
+  },
+  "TwoFactorAuthenticationDisabled": {
+    "One": "Two-factor authentication is disabled."
+  },
+  "ResetTwoFactorAuthentication": {
+    "One": "Reset OTP"
+  },
+  "ResetTwoFactorAuthenticationWarning": {
+    "One": "Reset this user's OTP? All active sessions will be revoked."
   }
 }

@@ -5,17 +5,18 @@ import (
 )
 
 type UserForm struct {
-	Id         uint   `json:"id"`
-	Username   string `json:"username" validate:"required,gte=2,lte=32"`
-	Email      string `json:"email"` //validate:"required,email" email不强制
-	Nickname   string `json:"nickname"`
-	Avatar     string `json:"avatar"`
-	GroupId    uint   `json:"group_id" validate:"required"`
-	IsAdmin    *bool  `json:"is_admin" `
-	Status     model.StatusCode `json:"status" validate:"required,gte=0"`
-	Remark     string `json:"remark"`
-	OtpEnabled bool   `json:"otp_enabled"`
-	OtpSecret  string `json:"otp_secret,omitempty"`
+	Id       uint             `json:"id"`
+	Username string           `json:"username" validate:"required,gte=2,lte=32"`
+	Email    string           `json:"email"` //validate:"required,email" email不强制
+	Nickname string           `json:"nickname"`
+	Avatar   string           `json:"avatar"`
+	GroupId  uint             `json:"group_id" validate:"required"`
+	IsAdmin  *bool            `json:"is_admin" `
+	Status   model.StatusCode `json:"status" validate:"required,gte=0"`
+	Remark   string           `json:"remark"`
+	// OtpEnabled is read-only in the generic user form. OTP changes must use
+	// the dedicated enrollment or administrator reset endpoints.
+	OtpEnabled bool `json:"otp_enabled"`
 }
 
 func (uf *UserForm) FromUser(user *model.User) *UserForm {
@@ -29,7 +30,6 @@ func (uf *UserForm) FromUser(user *model.User) *UserForm {
 	uf.Status = user.Status
 	uf.Remark = user.Remark
 	uf.OtpEnabled = user.OtpEnabled
-	uf.OtpSecret = user.OtpSecret
 	return uf
 }
 func (uf *UserForm) ToUser() *model.User {
@@ -43,9 +43,15 @@ func (uf *UserForm) ToUser() *model.User {
 	user.IsAdmin = uf.IsAdmin
 	user.Status = uf.Status
 	user.Remark = uf.Remark
-	user.OtpEnabled = uf.OtpEnabled
-	user.OtpSecret = uf.OtpSecret
 	return user
+}
+
+type OTPCodeForm struct {
+	Code string `json:"code" validate:"required,len=6,numeric"`
+}
+
+type OTPResetForm struct {
+	Id uint `json:"id" validate:"required,gt=0"`
 }
 
 type PageQuery struct {

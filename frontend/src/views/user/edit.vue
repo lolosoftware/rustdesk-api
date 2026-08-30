@@ -32,16 +32,12 @@
                    :inactive-value="DISABLE_STATUS"
         ></el-switch>
       </el-form-item>
-      <el-form-item label="Activer OTP">
-        <el-switch v-model="form.otp_enabled" @change="ensureOtpSecret"></el-switch>
-      </el-form-item>
-      <el-form-item v-if="form.otp_enabled" label="Secret OTP">
-        <el-input v-model="form.otp_secret" readonly>
-          <template #append>
-            <el-button @click="copyOtpSecret">Copier</el-button>
-          </template>
-        </el-input>
-        <div class="otp-help">Ajoutez ce secret dans votre application d’authentification.</div>
+      <el-form-item v-if="route.params.id > 0" :label="T('TwoFactorAuthentication')">
+        <el-tag v-if="form.otp_enabled" type="success">{{ T('Enabled') }}</el-tag>
+        <el-tag v-else type="info">{{ T('Disabled') }}</el-tag>
+        <el-button v-if="form.otp_enabled" type="danger" style="margin-left: 12px" @click="resetOtp">
+          {{ T('ResetTwoFactorAuthentication') }}
+        </el-button>
       </el-form-item>
       <el-form-item :label="T('Remark')" prop="remark">
           <el-input v-model="form.remark"></el-input>
@@ -59,46 +55,31 @@
   import { useGetDetail, useSubmit } from '@/views/user/composables/edit'
   import { ENABLE_STATUS, DISABLE_STATUS } from '@/utils/common_options'
   import { T } from '@/utils/i18n'
-  import { ElMessage } from 'element-plus'
+  import { ElMessage, ElMessageBox } from 'element-plus'
+  import { otpReset } from '@/api/user'
 
   const route = useRoute()
   const { form, item, getDetail, groupsList } = useGetDetail(route.params.id)
 
   const { root, rules, validate, submit, cancel } = useSubmit(form, route.params.id)
 
-  const ensureOtpSecret = (enabled) => {
-    if (!enabled || form.value.otp_secret) return
-    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
-    const bytes = new Uint8Array(20)
-    crypto.getRandomValues(bytes)
-    let secret = ''
-    let buffer = 0
-    let bits = 0
-    for (const byte of bytes) {
-      buffer = (buffer << 8) | byte
-      bits += 8
-      while (bits >= 5) {
-        secret += alphabet[(buffer >>> (bits - 5)) & 31]
-        bits -= 5
-      }
+  const resetOtp = async () => {
+    const confirmed = await ElMessageBox.confirm(
+      T('ResetTwoFactorAuthenticationWarning'),
+      T('ResetTwoFactorAuthentication'),
+      { type: 'warning' },
+    ).catch(() => false)
+    if (!confirmed) return
+    const res = await otpReset(Number(route.params.id)).catch(() => false)
+    if (res) {
+      form.value.otp_enabled = false
+      ElMessage.success(T('OperationSuccess'))
     }
-    if (bits > 0) secret += alphabet[(buffer << (5 - bits)) & 31]
-    form.value.otp_secret = secret
-  }
-
-  const copyOtpSecret = async () => {
-    await navigator.clipboard.writeText(form.value.otp_secret)
-    ElMessage.success('Secret OTP copié')
   }
 
 </script>
 
 <style lang="scss" scoped>
 .form-card {
-}
-.otp-help {
-  color: #909399;
-  font-size: 12px;
-  line-height: 1.5;
 }
 </style>

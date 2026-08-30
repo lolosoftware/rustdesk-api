@@ -12,8 +12,9 @@
           <el-input v-model="form.password" type="password" @keyup.enter.native="login" show-password
                     class="login-input"></el-input>
         </el-form-item>
-        <el-form-item label="Code OTP">
-          <el-input v-model="form.otp_code" maxlength="6" @keyup.enter.native="login"
+        <el-form-item v-if="otpRequired" :label="T('AuthenticationCode')">
+          <el-input ref="otpInput" v-model="form.otp_code" maxlength="6" inputmode="numeric"
+                    autocomplete="one-time-code" @keyup.enter.native="login"
                     class="login-input"></el-input>
         </el-form-item>
         <el-form-item :label="T('Captcha')" v-if="captchaCode">
@@ -46,7 +47,7 @@
 </template>
 
 <script setup>
-  import { reactive, onMounted, ref } from 'vue'
+  import { reactive, onMounted, ref, nextTick } from 'vue'
   import { useUserStore } from '@/store/user'
   import { ElMessage } from 'element-plus'
   import { T } from '@/utils/i18n'
@@ -87,6 +88,8 @@
   })
 
   const captchaCode = ref('')
+  const otpRequired = ref(false)
+  const otpInput = ref(null)
   const redirect = route.query?.redirect
   const login = async () => {
     const res = await userStore.login(form).catch(e => e)
@@ -98,6 +101,14 @@
     if (res.code === 110) {
       // need captcha
       loadCaptcha()
+    }
+    if (res.code === 111) {
+      otpRequired.value = true
+      // Captchas are single-use. When one was required for the password
+      // step, fetch a fresh challenge for the OTP submission.
+      if (captchaCode.value) await loadCaptcha()
+      await nextTick()
+      otpInput.value?.focus()
     }
   }
 

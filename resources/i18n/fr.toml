@@ -123,6 +123,21 @@ description = "Old password error."
 one = "Ancien mot de passe incorrect."
 other = "Ancien mot de passe incorrect."
 
+[OtpRequired]
+description = "OTP required."
+one = "Saisissez le code de votre application d’authentification."
+other = "Saisissez le code de votre application d’authentification."
+
+[OtpCodeError]
+description = "Invalid OTP code."
+one = "Le code d’authentification est invalide ou expiré."
+other = "Le code d’authentification est invalide ou expiré."
+
+[OtpAlreadyEnabled]
+description = "OTP already enabled."
+one = "L’authentification à deux facteurs est déjà activée."
+other = "L’authentification à deux facteurs est déjà activée."
+
 [DefaultGroup]
 description = "Default group"
 one = "Groupe Défaut"

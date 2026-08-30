@@ -81,6 +81,10 @@ func UserBind(rg *gin.RouterGroup) {
 		aR.POST("/myOauth", cont.MyOauth)
 		//aR.GET("/myPeer", cont.MyPeer)
 		aR.POST("/groupUsers", cont.GroupUsers)
+		aR.GET("/otp/status", cont.OTPStatus)
+		aR.POST("/otp/setup", cont.OTPSetup)
+		aR.POST("/otp/confirm", cont.OTPConfirm)
+		aR.POST("/otp/disable", cont.OTPDisable)
 	}
 	aRP := rg.Group("/user").Use(middleware.AdminPrivilege())
 	{
@@ -91,6 +95,7 @@ func UserBind(rg *gin.RouterGroup) {
 		aRP.POST("/update", cont.Update)
 		aRP.POST("/delete", cont.Delete)
 		aRP.POST("/changePwd", cont.UpdatePassword)
+		aRP.POST("/otp/reset", cont.OTPReset)
 	}
 }
 

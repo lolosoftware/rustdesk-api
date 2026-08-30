@@ -266,6 +266,12 @@ func (us *UserService) FlushToken(u *model.User) error {
 	return DB.Where("user_id = ?", u.Id).Delete(&model.UserToken{}).Error
 }
 
+// FlushOtherTokens invalidates existing sessions after a security-sensitive
+// account change while preserving the session that performed the change.
+func (us *UserService) FlushOtherTokens(u *model.User, token string) error {
+	return DB.Where("user_id = ? and token <> ?", u.Id, token).Delete(&model.UserToken{}).Error
+}
+
 // FlushTokenByUuid 清空token
 func (us *UserService) FlushTokenByUuid(uuid string) error {
 	return DB.Where("device_uuid = ?", uuid).Delete(&model.UserToken{}).Error

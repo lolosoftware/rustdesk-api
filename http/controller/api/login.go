@@ -72,6 +72,7 @@ func (l *Login) Login(c *gin.Context) {
 
 	if u.OtpEnabled {
 		if strings.TrimSpace(f.OtpCode) == "" || !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+			loginLimiter.RecordFailedAttempt(clientIp)
 			response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
 			return
 		}

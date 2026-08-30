@@ -19,6 +19,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/mojocn/base64Captcha v1.3.6
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
+	github.com/pquerna/otp v1.4.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/viper v1.9.0
@@ -39,6 +40,7 @@ require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/bytedance/sonic v1.8.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect

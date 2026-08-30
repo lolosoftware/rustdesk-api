@@ -88,7 +88,12 @@ func (ct *Login) Login(c *gin.Context) {
 	}
 
 	if u.OtpEnabled {
-		if strings.TrimSpace(f.OtpCode) == "" || !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+		if strings.TrimSpace(f.OtpCode) == "" {
+			response.Fail(c, 111, response.TranslateMsg(c, "OtpRequired"))
+			return
+		}
+		if !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+			loginLimiter.RecordFailedAttempt(clientIp)
 			response.Fail(c, 101, response.TranslateMsg(c, "OtpCodeError"))
 			return
 		}

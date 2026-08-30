@@ -534,5 +534,65 @@
   },
   "Remark": {
     "One": "Remarque"
+  },
+  "AuthenticationCode": {
+    "One": "Code d’authentification"
+  },
+  "TwoFactorAuthentication": {
+    "One": "Authentification à deux facteurs"
+  },
+  "Enabled": {
+    "One": "Activée"
+  },
+  "Disabled": {
+    "One": "Désactivée"
+  },
+  "Configure": {
+    "One": "Configurer"
+  },
+  "Disable": {
+    "One": "Désactiver"
+  },
+  "ConfigureTwoFactorAuthentication": {
+    "One": "Configurer l’authentification à deux facteurs"
+  },
+  "ScanAuthenticatorQR": {
+    "One": "Scannez ce QR code avec votre application d’authentification."
+  },
+  "AuthenticatorQRCode": {
+    "One": "QR code de configuration OTP"
+  },
+  "ManualAuthenticatorKey": {
+    "One": "Ou saisissez cette clé manuellement :"
+  },
+  "Copy": {
+    "One": "Copier"
+  },
+  "Copied": {
+    "One": "Copié"
+  },
+  "EnterAuthenticatorCodeToConfirm": {
+    "One": "Saisissez le code à 6 chiffres affiché par l’application pour confirmer l’activation."
+  },
+  "EnterAuthenticatorCodeToDisable": {
+    "One": "Saisissez votre code d’authentification actuel pour désactiver la protection."
+  },
+  "DisableTwoFactorAuthentication": {
+    "One": "Désactiver l’authentification à deux facteurs"
+  },
+  "AuthenticationCodeMustHaveSixDigits": {
+    "One": "Le code doit contenir exactement 6 chiffres."
+  },
+  "TwoFactorAuthenticationEnabled": {
+    "One": "L’authentification à deux facteurs est activée."
+  },
+  "TwoFactorAuthenticationDisabled": {
+    "One": "L’authentification à deux facteurs est désactivée."
+  },
+  "ResetTwoFactorAuthentication": {
+    "One": "Réinitialiser l’OTP"
+  },
+  "ResetTwoFactorAuthenticationWarning": {
+    "One": "Réinitialiser l’OTP de cet utilisateur ? Toutes ses sessions actives seront révoquées."
   }
 }

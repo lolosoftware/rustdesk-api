@@ -115,6 +115,21 @@ description = "Old password error."
 one = "Old password error."
 other = "Old password error."
 
+[OtpRequired]
+description = "OTP required."
+one = "Enter the code from your authenticator app."
+other = "Enter the code from your authenticator app."
+
+[OtpCodeError]
+description = "Invalid OTP code."
+one = "The authentication code is invalid or expired."
+other = "The authentication code is invalid or expired."
+
+[OtpAlreadyEnabled]
+description = "OTP already enabled."
+one = "Two-factor authentication is already enabled."
+other = "Two-factor authentication is already enabled."
+
 [DefaultGroup]
 description = "Default group"
 one = "Default Group"
