@@ -11,14 +11,15 @@ const (
 )
 
 type Rustdesk struct {
-	IdServer        string `mapstructure:"id-server"`
-	IdServerPort    int    `mapstructure:"-"`
-	RelayServer     string `mapstructure:"relay-server"`
-	RelayServerPort int    `mapstructure:"-"`
-	ApiServer       string `mapstructure:"api-server"`
-	Key             string `mapstructure:"key"`
-	KeyFile         string `mapstructure:"key-file"`
-	Personal        int    `mapstructure:"personal"`
+	IdServer                       string `mapstructure:"id-server"`
+	IdServerPort                   int    `mapstructure:"-"`
+	RelayServer                    string `mapstructure:"relay-server"`
+	RelayServerPort                int    `mapstructure:"-"`
+	ApiServer                      string `mapstructure:"api-server"`
+	Key                            string `mapstructure:"key"`
+	KeyFile                        string `mapstructure:"key-file"`
+	Personal                       int    `mapstructure:"personal"`
+	AutoAddAddressBookCollectionID uint   `mapstructure:"auto-add-address-book-collection-id"`
 	//webclient-magic-queryonline
 	WebclientMagicQueryonline int    `mapstructure:"webclient-magic-queryonline"`
 	WsHost                    string `mapstructure:"ws-host"`

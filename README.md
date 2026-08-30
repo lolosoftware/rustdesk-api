@@ -189,6 +189,7 @@ Le tableau ci-dessous n’est pas exhaustif. Consultez le fichier `conf/config.y
 | RUSTDESK_API_RUSTDESK_API_SERVER | Adresse du serveur API RustDesk | http://192.168.1.66:21114 |
 | RUSTDESK_API_RUSTDESK_KEY | Clé RustDesk | 123456789 |
 | RUSTDESK_API_RUSTDESK_KEY_FILE | Fichier contenant la clé RustDesk | `./conf/data/id_ed25519.pub` |
+| RUSTDESK_API_RUSTDESK_AUTO_ADD_ADDRESS_BOOK_COLLECTION_ID | ID du carnet nommé auquel ajouter automatiquement les postes qui remontent leur `sysinfo` ; `0` = désactivé. L’entrée appartient au propriétaire du carnet et un poste déjà présent n’est pas dupliqué. | `0` |
 | RUSTDESK_API_RUSTDESK_WEBCLIENT<br/>_MAGIC_QUERYONLINE | Activer la nouvelle méthode de requête de statut en ligne dans le client web v2 ; `1` = activée, `0` = désactivée, défaut `0` | `0` |
 | RUSTDESK_API_RUSTDESK_WS_HOST | Base HTTPS/WSS optionnelle du proxy WebSocket. Le client ajoute `/id` pour le port 21118 et `/relay` pour le port 21119 | `https://rdapi.example.com/webclient-ws` |
 | ---- PROXY ----- | --- | --- |

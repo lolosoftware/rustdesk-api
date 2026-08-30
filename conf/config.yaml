@@ -49,6 +49,9 @@ rustdesk:
   key: ""
   key-file: "/data/id_ed25519.pub"
   personal: 1
+  # Ajoute automatiquement chaque poste remontant son sysinfo dans ce carnet nommé.
+  # 0 désactive la fonction ; la valeur correspond à l'ID du carnet dans l'administration.
+  auto-add-address-book-collection-id: 0
   webclient-magic-queryonline: 0
   ws-host: ""  # ex. : wss://192.168.1.3:4443
 logger:

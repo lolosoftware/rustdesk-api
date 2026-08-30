@@ -2,8 +2,10 @@ package service
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/lejianwen/rustdesk-api/v2/model"
+	"github.com/lejianwen/rustdesk-api/v2/model/custom_types"
 	"gorm.io/gorm"
 	"strings"
 )
@@ -124,6 +126,31 @@ func (s *AddressBookService) FromPeer(peer *model.Peer) (a *model.AddressBook) {
 	a.UserId = peer.UserId
 	a.Platform = s.PlatformFromOs(peer.Os)
 	return a
+}
+
+// EnsurePeerInCollection adds a reported device to a configured named address
+// book. The collection owner owns the resulting entry, independently of the
+// user currently bound to the device.
+func (s *AddressBookService) EnsurePeerInCollection(peer *model.Peer, collectionId uint) error {
+	if peer == nil || peer.Id == "" || collectionId == 0 {
+		return nil
+	}
+
+	collection := s.CollectionInfoById(collectionId)
+	if collection.Id == 0 {
+		return fmt.Errorf("address book collection %d not found", collectionId)
+	}
+
+	existing := s.InfoByUserIdAndIdAndCid(collection.UserId, peer.Id, collectionId)
+	if existing.RowId != 0 {
+		return nil
+	}
+
+	ab := s.FromPeer(peer)
+	ab.UserId = collection.UserId
+	ab.CollectionId = collectionId
+	ab.Tags = custom_types.AutoJson(json.RawMessage("[]"))
+	return s.Create(ab)
 }
 
 // Create 创建

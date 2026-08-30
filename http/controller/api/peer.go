@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/lejianwen/rustdesk-api/v2/global"
 	requstform "github.com/lejianwen/rustdesk-api/v2/http/request/api"
 	"github.com/lejianwen/rustdesk-api/v2/http/response"
 	"github.com/lejianwen/rustdesk-api/v2/service"
@@ -32,6 +33,7 @@ func (p *Peer) SysInfo(c *gin.Context) {
 	}
 	fpe := f.ToPeer()
 	pe := service.AllService.PeerService.FindById(f.Id)
+	savedPeer := pe
 	if pe.RowId == 0 {
 		pe = f.ToPeer()
 		pe.UserId = service.AllService.UserService.FindLatestUserIdFromLoginLogByUuid(pe.Uuid, pe.Id)
@@ -40,6 +42,7 @@ func (p *Peer) SysInfo(c *gin.Context) {
 			response.Error(c, response.TranslateMsg(c, "OperationFailed")+err.Error())
 			return
 		}
+		savedPeer = pe
 	} else {
 		if pe.UserId == 0 {
 			pe.UserId = service.AllService.UserService.FindLatestUserIdFromLoginLogByUuid(pe.Uuid, pe.Id)
@@ -50,6 +53,13 @@ func (p *Peer) SysInfo(c *gin.Context) {
 		if err != nil {
 			response.Error(c, response.TranslateMsg(c, "OperationFailed")+err.Error())
 			return
+		}
+		savedPeer = fpe
+	}
+	collectionId := global.Config.Rustdesk.AutoAddAddressBookCollectionID
+	if collectionId > 0 {
+		if err = service.AllService.AddressBookService.EnsurePeerInCollection(savedPeer, collectionId); err != nil {
+			global.Logger.WithError(err).Warn("failed to add reported peer to configured address book")
 		}
 	}
 	//SYSINFO_UPDATED 上传成功

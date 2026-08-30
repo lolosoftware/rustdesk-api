@@ -45,6 +45,9 @@ jobs:
           mkdir -p resources/admin
           cp -R frontend/dist/. resources/admin/
 
+      - name: Test automatic address book assignment
+        run: go test ./service ./http/controller/api
+
       - name: Build application bundle
         shell: bash
         run: |
