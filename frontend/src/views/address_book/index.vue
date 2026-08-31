@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-card class="list-query" shadow="hover">
-      <el-form inline label-width="120px">
+      <el-form class="address-book-filter-form" inline label-width="auto">
         <el-form-item :label="T('Owner')">
           <el-select v-model="listQuery.user_id" clearable @change="changeQueryUser">
             <el-option
@@ -27,11 +27,11 @@
         <el-form-item :label="T('Hostname')">
           <el-input v-model="listQuery.hostname" clearable></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
-          <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
-        </el-form-item>
       </el-form>
+      <div class="address-book-list-actions">
+        <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
+        <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
+      </div>
     </el-card>
     <el-card class="list-body" shadow="hover">
       <!--      <el-tag type="danger" style="margin-bottom: 10px">不建议在此操作地址簿，可能会造成数据不同步</el-tag>-->
@@ -233,6 +233,22 @@
 <style scoped lang="scss">
 .list-query .el-select {
   --el-select-width: 160px;
+}
+
+.address-book-filter-form {
+  :deep(.el-form-item__label) {
+    white-space: nowrap;
+  }
+}
+
+.address-book-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  :deep(.el-button) {
+    margin-left: 0;
+  }
 }
 
 .colors {
