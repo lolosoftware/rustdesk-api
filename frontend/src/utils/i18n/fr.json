@@ -71,6 +71,9 @@
   "Hostname": {
     "One": "Nom d'hôte"
   },
+  "DuplicateHostnames": {
+    "One": "Noms d'hôte en double"
+  },
   "Alias": {
     "One": "Alias"
   },

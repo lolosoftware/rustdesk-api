@@ -91,6 +91,20 @@ func (ps *PeerService) List(page, pageSize uint, where func(tx *gorm.DB)) (res *
 	return
 }
 
+// FilterDuplicateHostnames keeps peers whose normalized hostname is used by
+// more than one peer. Empty hostnames are deliberately excluded.
+func (ps *PeerService) FilterDuplicateHostnames(tx *gorm.DB) {
+	duplicateHostnames := DB.Model(&model.Peer{}).
+		Select("LOWER(TRIM(hostname))").
+		Where("TRIM(hostname) <> ''").
+		Group("LOWER(TRIM(hostname))").
+		Having("COUNT(*) > 1")
+
+	tx.Where("LOWER(TRIM(hostname)) IN (?)", duplicateHostnames)
+	tx.Order("LOWER(TRIM(hostname)) ASC")
+	tx.Order("row_id ASC")
+}
+
 // ListFilterByUserId 根据用户id过滤Peer列表
 func (ps *PeerService) ListFilterByUserId(page, pageSize uint, where func(tx *gorm.DB), userId uint) (res *model.PeerList) {
 	userWhere := func(tx *gorm.DB) {

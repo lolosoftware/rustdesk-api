@@ -71,6 +71,9 @@
   "Hostname": {
     "One": "Hostname"
   },
+  "DuplicateHostnames": {
+    "One": "Duplicate hostnames"
+  },
   "Alias": {
     "One": "Alias"
   },

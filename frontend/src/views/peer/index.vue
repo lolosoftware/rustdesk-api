@@ -27,6 +27,11 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
+          <el-button
+              :type="listQuery.duplicate_hostname ? 'warning' : 'default'"
+              :plain="!listQuery.duplicate_hostname"
+              @click="toggleDuplicateHostnameFilter"
+          >{{ T('DuplicateHostnames') }}</el-button>
           <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
           <el-button type="success" @click="toExport">{{ T('Export') }}</el-button>
           <el-popover :visible="showImport" placement="bottom" :width="600">
@@ -279,6 +284,7 @@
     time_ago: null,
     id: '',
     hostname: '',
+    duplicate_hostname: false,
     username: '',
     ip: '',
   })
@@ -298,6 +304,11 @@
     } else {
       listQuery.page = 1
     }
+  }
+
+  const toggleDuplicateHostnameFilter = () => {
+    listQuery.duplicate_hostname = !listQuery.duplicate_hostname
+    handlerQuery()
   }
 
   const del = async (row) => {
