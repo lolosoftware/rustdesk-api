@@ -1,14 +1,14 @@
 <template>
   <div>
     <el-card class="list-query" shadow="hover">
-      <el-form inline label-width="60px">
+      <el-form class="peer-filter-form" inline label-width="auto">
         <el-form-item label="ID">
           <el-input v-model="listQuery.id" clearable/>
         </el-form-item>
         <el-form-item :label="T('Hostname')">
           <el-input v-model="listQuery.hostname" clearable/>
         </el-form-item>
-        <el-form-item :label="T('LastOnlineTime')" label-width="100px">
+        <el-form-item :label="T('LastOnlineTime')">
           <el-select v-model="listQuery.time_ago" clearable>
             <el-option
                 v-for="item in timeFilters"
@@ -28,16 +28,17 @@
         <el-form-item label="IP">
           <el-input v-model="listQuery.ip" clearable/>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
-          <el-button
-              :type="listQuery.duplicate_hostname ? 'warning' : 'default'"
-              :plain="!listQuery.duplicate_hostname"
-              @click="toggleDuplicateHostnameFilter"
-          >{{ T('DuplicateHostnames') }}</el-button>
-          <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
-          <el-button type="success" @click="toExport">{{ T('Export') }}</el-button>
-          <el-popover :visible="showImport" placement="bottom" :width="600">
+      </el-form>
+      <div class="peer-list-actions">
+        <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
+        <el-button
+            :type="listQuery.duplicate_hostname ? 'warning' : 'default'"
+            :plain="!listQuery.duplicate_hostname"
+            @click="toggleDuplicateHostnameFilter"
+        >{{ T('DuplicateHostnames') }}</el-button>
+        <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
+        <el-button type="success" @click="toExport">{{ T('Export') }}</el-button>
+        <el-popover :visible="showImport" placement="bottom" :width="600">
             <el-upload
                 class="upload-demo"
                 drag
@@ -63,11 +64,10 @@
             <template #reference>
               <el-button @click="showImport=true" type="danger" :icon="ArrowDown">{{ T('Import') }}</el-button>
             </template>
-          </el-popover>
-          <el-button type="danger" @click="toBatchDelete">{{ T('BatchDelete') }}</el-button>
-          <el-button type="primary" @click="toBatchAddToAB">{{ T('BatchAddToAB') }}</el-button>
-        </el-form-item>
-      </el-form>
+        </el-popover>
+        <el-button type="danger" @click="toBatchDelete">{{ T('BatchDelete') }}</el-button>
+        <el-button type="primary" @click="toBatchAddToAB">{{ T('BatchAddToAB') }}</el-button>
+      </div>
     </el-card>
     <el-card class="list-body" shadow="hover">
       <div style="text-align: right; margin-bottom: 10px">
@@ -586,6 +586,22 @@
 <style scoped lang="scss">
 .list-query .el-select {
   --el-select-width: 180px;
+}
+
+.peer-filter-form {
+  :deep(.el-form-item__label) {
+    white-space: nowrap;
+  }
+}
+
+.peer-list-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  :deep(.el-button) {
+    margin-left: 0;
+  }
 }
 
 .last_oline_time {
