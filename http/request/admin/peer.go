@@ -46,6 +46,7 @@ type PeerQuery struct {
 	Uuids             string `json:"uuids" form:"uuids"`
 	Ip                string `json:"ip" form:"ip"`
 	Username          string `json:"username" form:"username"`
+	Os                string `json:"os" form:"os"`
 	Alias             string `json:"alias" form:"alias"`
 }
 

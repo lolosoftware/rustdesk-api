@@ -80,6 +80,7 @@ func (ct *Peer) Create(c *gin.Context) {
 // @Param id query string false "ID"
 // @Param hostname query string false "主机名"
 // @Param duplicate_hostname query bool false "仅显示主机名重复的设备"
+// @Param os query string false "操作系统"
 // @Param uuids query string false "uuids 用逗号分隔"
 // @Success 200 {object} response.Response{data=model.PeerList}
 // @Failure 500 {object} response.Response
@@ -114,6 +115,9 @@ func (ct *Peer) List(c *gin.Context) {
 		}
 		if query.Username != "" {
 			tx.Where("username like ?", "%"+query.Username+"%")
+		}
+		if query.Os != "" {
+			tx.Where("os like ?", "%"+query.Os+"%")
 		}
 		if query.Ip != "" {
 			tx.Where("last_online_ip like ?", "%"+query.Ip+"%")

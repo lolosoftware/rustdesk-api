@@ -22,6 +22,9 @@
         <el-form-item :label="T('Username')">
           <el-input v-model="listQuery.username" clearable/>
         </el-form-item>
+        <el-form-item :label="T('Os')">
+          <el-input v-model="listQuery.os" clearable/>
+        </el-form-item>
         <el-form-item label="IP">
           <el-input v-model="listQuery.ip" clearable/>
         </el-form-item>
@@ -286,6 +289,7 @@
     hostname: '',
     duplicate_hostname: false,
     username: '',
+    os: '',
     ip: '',
   })
 
