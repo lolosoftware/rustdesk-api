@@ -79,3 +79,48 @@ func TestEnsurePeerInCollectionRejectsUnknownCollection(t *testing.T) {
 		t.Fatal("expected an error for an unknown address book collection")
 	}
 }
+
+func TestFilterDuplicateAddressBookHostnames(t *testing.T) {
+	db, err := gorm.Open(sqlite.Open("file:duplicate-address-books?mode=memory&cache=shared"), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err = db.AutoMigrate(&model.AddressBook{}); err != nil {
+		t.Fatal(err)
+	}
+
+	previousDB := DB
+	DB = db
+	t.Cleanup(func() { DB = previousDB })
+
+	entries := []*model.AddressBook{
+		{Id: "1", UserId: 1, CollectionId: 10, Hostname: "PC-COMPTA", Platform: "Windows"},
+		{Id: "2", UserId: 1, CollectionId: 10, Hostname: " pc-compta ", Platform: "Windows"},
+		{Id: "3", UserId: 1, CollectionId: 11, Hostname: "PC-COMPTA", Platform: "Windows"},
+		{Id: "4", UserId: 2, CollectionId: 10, Hostname: "PC-COMPTA", Platform: "Windows"},
+		{Id: "5", UserId: 1, CollectionId: 10, Hostname: "SRV-FICHIERS", Platform: "Linux"},
+		{Id: "6", UserId: 1, CollectionId: 10, Hostname: "SRV-FICHIERS", Platform: "Linux"},
+		{Id: "7", UserId: 1, CollectionId: 10, Hostname: "POSTE-UNIQUE", Platform: "Windows"},
+		{Id: "8", UserId: 1, CollectionId: 10, Hostname: ""},
+		{Id: "9", UserId: 1, CollectionId: 10, Hostname: "   "},
+	}
+	if err = db.Create(&entries).Error; err != nil {
+		t.Fatal(err)
+	}
+
+	addressBooks := &AddressBookService{}
+	duplicates := addressBooks.List(1, 100, func(tx *gorm.DB) {
+		addressBooks.FilterDuplicateHostnames(tx)
+	})
+	if duplicates.Total != 4 {
+		t.Fatalf("got %d duplicate entries, want 4", duplicates.Total)
+	}
+
+	windowsDuplicates := addressBooks.List(1, 100, func(tx *gorm.DB) {
+		tx.Where("platform like ?", "%Windows%")
+		addressBooks.FilterDuplicateHostnames(tx)
+	})
+	if windowsDuplicates.Total != 2 {
+		t.Fatalf("got %d Windows duplicate entries, want 2", windowsDuplicates.Total)
+	}
+}

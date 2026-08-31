@@ -21,6 +21,8 @@ type AddressBook struct{}
 // @Param page query int false "页码"
 // @Param page_size query int false "页大小"
 // @Param user_id query int false "用户id"
+// @Param os query string false "操作系统"
+// @Param duplicate_hostname query bool false "仅显示同一地址簿内主机名重复的设备"
 // @Success 200 {object} response.Response{data=model.AddressBookList}
 // @Failure 500 {object} response.Response
 // @Router /admin/my/address_book/list [get]
@@ -47,6 +49,12 @@ func (ct *AddressBook) List(c *gin.Context) {
 		}
 		if query.Hostname != "" {
 			tx.Where("hostname like ?", "%"+query.Hostname+"%")
+		}
+		if query.Os != "" {
+			tx.Where("platform like ?", "%"+query.Os+"%")
+		}
+		if query.DuplicateHostname {
+			service.AllService.AddressBookService.FilterDuplicateHostnames(tx)
 		}
 		if query.CollectionId != nil && *query.CollectionId >= 0 {
 			tx.Where("collection_id = ?", query.CollectionId)

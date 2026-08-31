@@ -30,6 +30,8 @@ export function useRepositories (api_type = 'my') {
     user_id: null,
     username: null,
     hostname: null,
+    os: null,
+    duplicate_hostname: false,
     collection_id: null,
   })
 

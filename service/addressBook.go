@@ -118,6 +118,23 @@ func (s *AddressBookService) List(page, pageSize uint, where func(tx *gorm.DB)) 
 	return
 }
 
+// FilterDuplicateHostnames keeps duplicate hostnames within the same owner's
+// address book. Empty hostnames are deliberately excluded.
+func (s *AddressBookService) FilterDuplicateHostnames(tx *gorm.DB) {
+	tx.Where(`TRIM(address_books.hostname) <> '' AND EXISTS (
+		SELECT 1
+		FROM address_books AS duplicate_address_books
+		WHERE LOWER(TRIM(duplicate_address_books.hostname)) = LOWER(TRIM(address_books.hostname))
+			AND duplicate_address_books.user_id = address_books.user_id
+			AND duplicate_address_books.collection_id = address_books.collection_id
+			AND duplicate_address_books.row_id <> address_books.row_id
+	)`)
+	tx.Order("user_id ASC")
+	tx.Order("collection_id ASC")
+	tx.Order("LOWER(TRIM(hostname)) ASC")
+	tx.Order("row_id ASC")
+}
+
 func (s *AddressBookService) FromPeer(peer *model.Peer) (a *model.AddressBook) {
 	a = &model.AddressBook{}
 	a.Id = peer.Id

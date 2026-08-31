@@ -27,9 +27,24 @@
         <el-form-item :label="T('Hostname')">
           <el-input v-model="listQuery.hostname" clearable></el-input>
         </el-form-item>
+        <el-form-item :label="T('Os')">
+          <el-select v-model="listQuery.os" clearable filterable>
+            <el-option
+                v-for="platform in platformList"
+                :key="platform.value"
+                :label="platform.label"
+                :value="platform.value"
+            ></el-option>
+          </el-select>
+        </el-form-item>
       </el-form>
       <div class="address-book-list-actions">
         <el-button type="primary" @click="handlerQuery">{{ T('Filter') }}</el-button>
+        <el-button
+            :type="listQuery.duplicate_hostname ? 'warning' : 'default'"
+            :plain="!listQuery.duplicate_hostname"
+            @click="toggleDuplicateHostnameFilter"
+        >{{ T('DuplicateHostnames') }}</el-button>
         <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
       </div>
     </el-card>
@@ -226,6 +241,11 @@
   watch(() => listQuery.page, getList)
 
   watch(() => listQuery.page_size, handlerQuery)
+
+  const toggleDuplicateHostnameFilter = () => {
+    listQuery.duplicate_hostname = !listQuery.duplicate_hostname
+    handlerQuery()
+  }
 
 
 </script>
