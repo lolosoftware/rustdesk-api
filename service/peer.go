@@ -105,6 +105,16 @@ func (ps *PeerService) FilterDuplicateHostnames(tx *gorm.DB) {
 	tx.Order("row_id ASC")
 }
 
+// FilterWithoutAddressBook keeps peers whose RustDesk ID does not occur in
+// any address book, regardless of its owner or collection.
+func (ps *PeerService) FilterWithoutAddressBook(tx *gorm.DB) {
+	tx.Where(`NOT EXISTS (
+		SELECT 1
+		FROM address_books
+		WHERE address_books.id = peers.id
+	)`)
+}
+
 // ListFilterByUserId 根据用户id过滤Peer列表
 func (ps *PeerService) ListFilterByUserId(page, pageSize uint, where func(tx *gorm.DB), userId uint) (res *model.PeerList) {
 	userWhere := func(tx *gorm.DB) {

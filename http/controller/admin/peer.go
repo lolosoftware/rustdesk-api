@@ -80,6 +80,7 @@ func (ct *Peer) Create(c *gin.Context) {
 // @Param id query string false "ID"
 // @Param hostname query string false "主机名"
 // @Param duplicate_hostname query bool false "仅显示主机名重复的设备"
+// @Param without_address_book query bool false "仅显示不在任何地址簿中的设备"
 // @Param os query string false "操作系统"
 // @Param uuids query string false "uuids 用逗号分隔"
 // @Success 200 {object} response.Response{data=model.PeerList}
@@ -109,6 +110,9 @@ func (ct *Peer) List(c *gin.Context) {
 		}
 		if query.DuplicateHostname {
 			service.AllService.PeerService.FilterDuplicateHostnames(tx)
+		}
+		if query.WithoutAddressBook {
+			service.AllService.PeerService.FilterWithoutAddressBook(tx)
 		}
 		if query.Uuids != "" {
 			tx.Where("uuid in (?)", query.Uuids)

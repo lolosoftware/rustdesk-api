@@ -36,6 +36,11 @@
             :plain="!listQuery.duplicate_hostname"
             @click="toggleDuplicateHostnameFilter"
         >{{ T('DuplicateHostnames') }}</el-button>
+        <el-button
+            :type="listQuery.without_address_book ? 'info' : 'default'"
+            :plain="!listQuery.without_address_book"
+            @click="toggleWithoutAddressBookFilter"
+        >{{ T('WithoutAddressBook') }}</el-button>
         <el-button type="danger" @click="toAdd">{{ T('Add') }}</el-button>
         <el-button type="success" @click="toExport">{{ T('Export') }}</el-button>
         <el-popover :visible="showImport" placement="bottom" :width="600">
@@ -288,6 +293,7 @@
     id: '',
     hostname: '',
     duplicate_hostname: false,
+    without_address_book: false,
     username: '',
     os: '',
     ip: '',
@@ -312,6 +318,11 @@
 
   const toggleDuplicateHostnameFilter = () => {
     listQuery.duplicate_hostname = !listQuery.duplicate_hostname
+    handlerQuery()
+  }
+
+  const toggleWithoutAddressBookFilter = () => {
+    listQuery.without_address_book = !listQuery.without_address_book
     handlerQuery()
   }
 

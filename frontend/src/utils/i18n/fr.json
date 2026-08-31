@@ -74,6 +74,9 @@
   "DuplicateHostnames": {
     "One": "Noms d'hôte en double"
   },
+  "WithoutAddressBook": {
+    "One": "Sans carnet d'adresses"
+  },
   "Alias": {
     "One": "Alias"
   },

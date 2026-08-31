@@ -43,6 +43,7 @@ type PeerQuery struct {
 	Id                string `json:"id" form:"id"`
 	Hostname          string `json:"hostname" form:"hostname"`
 	DuplicateHostname bool   `json:"duplicate_hostname" form:"duplicate_hostname"`
+	WithoutAddressBook bool   `json:"without_address_book" form:"without_address_book"`
 	Uuids             string `json:"uuids" form:"uuids"`
 	Ip                string `json:"ip" form:"ip"`
 	Username          string `json:"username" form:"username"`

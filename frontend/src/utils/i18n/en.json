@@ -74,6 +74,9 @@
   "DuplicateHostnames": {
     "One": "Duplicate hostnames"
   },
+  "WithoutAddressBook": {
+    "One": "Without address book"
+  },
   "Alias": {
     "One": "Alias"
   },
