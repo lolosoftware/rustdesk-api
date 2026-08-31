@@ -76,11 +76,21 @@ func (oa *Oauth) FormatOauthInfo() error {
 	if oauthType == OauthTypeGoogle && issuer == "" {
 		oa.Issuer = IssuerGoogle
 	}
+	// OIDC authentication always uses PKCE with S256. The plain method exposes
+	// the verifier in the authorization request and is no longer accepted.
+	if oauthType == OauthTypeGoogle || oauthType == OauthTypeOidc {
+		oa.PkceEnable = new(bool)
+		*oa.PkceEnable = true
+		oa.PkceMethod = PKCEMethodS256
+	}
 	if oa.PkceEnable == nil {
 		oa.PkceEnable = new(bool)
 		*oa.PkceEnable = false
 	}
-	if oa.PkceMethod == "" {
+	if oa.AutoRegister == nil {
+		oa.AutoRegister = new(bool)
+	}
+	if oa.PkceMethod != PKCEMethodS256 {
 		oa.PkceMethod = PKCEMethodS256
 	}
 	return nil

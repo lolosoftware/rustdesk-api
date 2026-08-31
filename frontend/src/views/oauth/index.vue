@@ -73,6 +73,7 @@
         </el-form-item>
         <el-form-item label="PkceEnable" prop="pkce_enable">
           <el-switch v-model="formData.pkce_enable"
+                     :disabled="['google', 'oidc'].includes(formData.oauth_type)"
                      :active-value="true"
                      :inactive-value="false">
           </el-switch>
@@ -80,8 +81,7 @@
 
         <el-form-item v-if="formData.pkce_enable" label="PkceMethod" prop="pkce_method">
           <el-select v-model="formData.pkce_method" placeholder="Select PKCE Method">
-            <el-option label="S256 (Recommended)" value="S256"></el-option>
-            <el-option label="Plain" value="plain"></el-option>
+            <el-option label="S256" value="S256"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item :label="T('AutoRegister')" prop="auto_register">
@@ -192,7 +192,7 @@
       { required: false, message: T('ParamRequired', { param: 'pkce_method' }), trigger: 'blur' },
       {
         validator: (rule, value, callback) => {
-          const allowedValues = ['S256', 'plain']
+          const allowedValues = ['S256']
           if (!allowedValues.includes(value)) {
             callback(new Error(T('InvalidParam', { param: 'pkce_method' })))
           } else {
@@ -203,6 +203,13 @@
       },
     ],
   }
+
+  watch(() => formData.oauth_type, type => {
+    if (type === 'google' || type === 'oidc') {
+      formData.pkce_enable = true
+      formData.pkce_method = 'S256'
+    }
+  })
 
   const defaultRedirect = () => {
     return `${app.setting.rustdeskConfig.api_server || window.location.origin}/api/oidc/callback`

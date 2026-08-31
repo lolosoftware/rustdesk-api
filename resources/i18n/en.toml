@@ -173,3 +173,18 @@ other = "Banned."
 description = "Register success, wait admin confirm."
 one = "Register success, wait admin confirm."
 other = "Register success, wait admin confirm."
+
+[IDTokenMissing]
+description = "OIDC ID token missing."
+one = "The identity provider did not return a valid ID token."
+other = "The identity provider did not return a valid ID token."
+
+[OauthEmailNotVerified]
+description = "OAuth email is not verified."
+one = "The email address returned by the identity provider is not verified."
+other = "The email address returned by the identity provider is not verified."
+
+[OauthIdentityInvalid]
+description = "OAuth identity is invalid."
+one = "The identity returned by the provider is invalid."
+other = "The identity returned by the provider is invalid."

@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/lejianwen/rustdesk-api/v2/model"
-	"github.com/lejianwen/rustdesk-api/v2/utils"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/github"
 
@@ -17,7 +17,6 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -35,20 +34,21 @@ type OidcEndpoint struct {
 }
 
 type OauthCacheItem struct {
-	UserId     uint   `json:"user_id"`
-	Id         string `json:"id"` //rustdesk的设备ID
-	Op         string `json:"op"`
-	Action     string `json:"action"`
-	Uuid       string `json:"uuid"`
-	DeviceName string `json:"device_name"`
-	DeviceOs   string `json:"device_os"`
-	DeviceType string `json:"device_type"`
-	OpenId     string `json:"open_id"`
-	Username   string `json:"username"`
-	Name       string `json:"name"`
-	Email      string `json:"email"`
-	Verifier   string `json:"verifier"` // used for oauth pkce
-	Nonce      string `json:"nonce"`
+	UserId           uint   `json:"user_id"`
+	Id               string `json:"id"` //rustdesk的设备ID
+	Op               string `json:"op"`
+	Action           string `json:"action"`
+	Uuid             string `json:"uuid"`
+	DeviceName       string `json:"device_name"`
+	DeviceOs         string `json:"device_os"`
+	DeviceType       string `json:"device_type"`
+	OpenId           string `json:"open_id"`
+	Username         string `json:"username"`
+	Name             string `json:"name"`
+	Email            string `json:"email"`
+	Verifier         string `json:"-"` // used for oauth pkce
+	Nonce            string `json:"-"`
+	CallbackConsumed bool   `json:"-"`
 }
 
 func (oci *OauthCacheItem) ToOauthUser() *model.OauthUser {
@@ -61,6 +61,7 @@ func (oci *OauthCacheItem) ToOauthUser() *model.OauthUser {
 }
 
 var OauthCache = &sync.Map{}
+var oauthCallbackMu sync.Mutex
 
 const (
 	OauthActionTypeLogin = "login"
@@ -95,8 +96,21 @@ func (os *OauthService) DeleteOauthCache(key string) {
 	OauthCache.Delete(key)
 }
 
+// ConsumeOauthCallback makes an authorization response single-use while
+// keeping the result available for the client polling endpoint.
+func (os *OauthService) ConsumeOauthCallback(key string) *OauthCacheItem {
+	oauthCallbackMu.Lock()
+	defer oauthCallbackMu.Unlock()
+	item := os.GetOauthCache(key)
+	if item == nil || item.CallbackConsumed {
+		return nil
+	}
+	item.CallbackConsumed = true
+	return item
+}
+
 func (os *OauthService) BeginAuth(op string) (error error, state, verifier, nonce, url string) {
-	state = utils.RandomString(10) + strconv.FormatInt(time.Now().Unix(), 10)
+	state = oauth2.GenerateVerifier()
 	verifier = ""
 	nonce = ""
 	if op == model.OauthTypeWebauth {
@@ -108,19 +122,14 @@ func (os *OauthService) BeginAuth(op string) (error error, state, verifier, nonc
 	if err == nil {
 		extras := make([]oauth2.AuthCodeOption, 0, 3)
 
-		nonce = utils.RandomString(10)
+		nonce = oauth2.GenerateVerifier()
 		extras = append(extras, oauth2.SetAuthURLParam("nonce", nonce))
 
-		if oauthInfo.PkceEnable != nil && *oauthInfo.PkceEnable {
-			extras = append(extras, oauth2.AccessTypeOffline)
+		usePKCE := oauthInfo.OauthType == model.OauthTypeGoogle || oauthInfo.OauthType == model.OauthTypeOidc ||
+			(oauthInfo.PkceEnable != nil && *oauthInfo.PkceEnable)
+		if usePKCE {
 			verifier = oauth2.GenerateVerifier()
-			switch oauthInfo.PkceMethod {
-			case model.PKCEMethodS256:
-				extras = append(extras, oauth2.S256ChallengeOption(verifier))
-			case model.PKCEMethodPlain:
-				// oauth2 does not have a plain challenge option, so we add it manually
-				extras = append(extras, oauth2.SetAuthURLParam("code_challenge_method", "plain"), oauth2.SetAuthURLParam("code_challenge", verifier))
-			}
+			extras = append(extras, oauth2.S256ChallengeOption(verifier))
 		}
 
 		return err, state, verifier, nonce, oauthConfig.AuthCodeURL(state, extras...)
@@ -213,26 +222,25 @@ func (os *OauthService) GetOauthConfig(op string) (err error, oauthInfo *model.O
 }
 
 func getHTTPClientWithProxy() *http.Client {
-	//add timeout 30s
-	timeout := time.Duration(60) * time.Second
-	if Config.Proxy.Enable {
+	timeout := 60 * time.Second
+	if Config != nil && Config.Proxy.Enable {
 		if Config.Proxy.Host == "" {
 			Logger.Warn("Proxy is enabled but proxy host is empty.")
-			return http.DefaultClient
+			return &http.Client{Timeout: timeout}
 		}
 		proxyURL, err := url.Parse(Config.Proxy.Host)
 		if err != nil {
 			Logger.Warn("Invalid proxy URL: ", err)
-			return http.DefaultClient
+			return &http.Client{Timeout: timeout}
 		}
 		transport := &http.Transport{
 			Proxy: http.ProxyURL(proxyURL),
 		}
 		return &http.Client{Transport: transport, Timeout: timeout}
 	}
-	return http.DefaultClient
+	return &http.Client{Timeout: timeout}
 }
-func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.Provider, code string, verifier string, nonce string, userData interface{}) (err error, client *http.Client) {
+func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.Provider, code string, verifier string, nonce string, requireIDToken bool, userData interface{}) (err error, client *http.Client) {
 
 	// 设置代理客户端
 	httpClient := getHTTPClientWithProxy()
@@ -252,6 +260,11 @@ func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.
 
 	// 获取 ID Token， github没有id_token
 	rawIDToken, ok := token.Extra("id_token").(string)
+	if requireIDToken && (!ok || rawIDToken == "") {
+		Logger.Warn("OIDC token response did not contain an ID Token")
+		return errors.New("IDTokenMissing"), nil
+	}
+	verifiedSubject := ""
 	if ok && rawIDToken != "" {
 		// 验证 ID Token
 		v := provider.Verifier(&oidc.Config{ClientID: oauthConfig.ClientID})
@@ -260,20 +273,21 @@ func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.
 			Logger.Warn("IdTokenVerifyError: ", err2)
 			return errors.New("IdTokenVerifyError"), nil
 		}
-		if nonce != "" {
-			// 验证 nonce
-			var claims struct {
-				Nonce string `json:"nonce"`
-			}
-			if err2 = idToken.Claims(&claims); err2 != nil {
-				Logger.Warn("Failed to parse ID Token claims: ", err)
-				return errors.New("IDTokenClaimsError"), nil
-			}
-
-			if claims.Nonce != nonce {
-				Logger.Warn("Nonce does not match")
-				return errors.New("NonceDoesNotMatch"), nil
-			}
+		var claims struct {
+			Nonce string `json:"nonce"`
+			Sub   string `json:"sub"`
+		}
+		if err2 = idToken.Claims(&claims); err2 != nil {
+			Logger.Warn("Failed to parse ID Token claims: ", err2)
+			return errors.New("IDTokenClaimsError"), nil
+		}
+		if claims.Sub == "" {
+			return errors.New("OauthIdentityInvalid"), nil
+		}
+		verifiedSubject = claims.Sub
+		if nonce != "" && claims.Nonce != nonce {
+			Logger.Warn("Nonce does not match")
+			return errors.New("NonceDoesNotMatch"), nil
 		}
 	}
 
@@ -289,11 +303,22 @@ func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.
 			Logger.Warn("failed closing response body: ", closeErr)
 		}
 	}()
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		Logger.Warn("userinfo endpoint returned: ", resp.Status)
+		return errors.New("GetOauthUserInfoError"), nil
+	}
 
 	// 解析用户信息
-	if err = json.NewDecoder(resp.Body).Decode(userData); err != nil {
+	if err = json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(userData); err != nil {
 		Logger.Warn("failed decoding user info: ", err)
 		return errors.New("DecodeOauthUserInfoError"), nil
+	}
+	if requireIDToken {
+		oidcUser, valid := userData.(*model.OidcUser)
+		if !valid || oidcUser.Sub == "" || oidcUser.Sub != verifiedSubject {
+			Logger.Warn("userinfo subject does not match the verified ID Token")
+			return errors.New("OauthIdentityInvalid"), nil
+		}
 	}
 
 	return nil, client
@@ -302,7 +327,7 @@ func (os *OauthService) callbackBase(oauthConfig *oauth2.Config, provider *oidc.
 // githubCallback github回调
 func (os *OauthService) githubCallback(oauthConfig *oauth2.Config, provider *oidc.Provider, code, verifier, nonce string) (error, *model.OauthUser) {
 	var user = &model.GithubUser{}
-	err, client := os.callbackBase(oauthConfig, provider, code, verifier, nonce, user)
+	err, client := os.callbackBase(oauthConfig, provider, code, verifier, nonce, false, user)
 	if err != nil {
 		return err, nil
 	}
@@ -316,7 +341,7 @@ func (os *OauthService) githubCallback(oauthConfig *oauth2.Config, provider *oid
 // linuxdoCallback linux.do回调
 func (os *OauthService) linuxdoCallback(oauthConfig *oauth2.Config, provider *oidc.Provider, code, verifier, nonce string) (error, *model.OauthUser) {
 	var user = &model.LinuxdoUser{}
-	err, _ := os.callbackBase(oauthConfig, provider, code, verifier, nonce, user)
+	err, _ := os.callbackBase(oauthConfig, provider, code, verifier, nonce, false, user)
 	if err != nil {
 		return err, nil
 	}
@@ -326,7 +351,7 @@ func (os *OauthService) linuxdoCallback(oauthConfig *oauth2.Config, provider *oi
 // oidcCallback oidc回调, 通过code获取用户信息
 func (os *OauthService) oidcCallback(oauthConfig *oauth2.Config, provider *oidc.Provider, code, verifier, nonce string) (error, *model.OauthUser) {
 	var user = &model.OidcUser{}
-	if err, _ := os.callbackBase(oauthConfig, provider, code, verifier, nonce, user); err != nil {
+	if err, _ := os.callbackBase(oauthConfig, provider, code, verifier, nonce, true, user); err != nil {
 		return err, nil
 	}
 	return nil, user.ToOauthUser()

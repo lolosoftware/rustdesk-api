@@ -87,8 +87,12 @@ func (o *Oauth) OidcAuthQueryPre(c *gin.Context) (*model.User, *model.UserToken)
 
 	// 获取用户信息
 	u = service.AllService.UserService.InfoById(v.UserId)
-	if u == nil {
+	if u == nil || u.Id == 0 {
 		response.Error(c, response.TranslateMsg(c, "UserNotFound"))
+		return nil, nil
+	}
+	if !service.AllService.UserService.CheckUserEnable(u) {
+		response.Error(c, response.TranslateMsg(c, "UserDisabled"))
 		return nil, nil
 	}
 
@@ -156,11 +160,19 @@ func (o *Oauth) OauthCallback(c *gin.Context) {
 	}
 	cacheKey := state
 	oauthService := service.AllService.OauthService
-	//从缓存中获取
-	oauthCache := oauthService.GetOauthCache(cacheKey)
+	// Consume the callback before exchanging the code to prevent replay and
+	// concurrent reuse of the same authorization transaction.
+	oauthCache := oauthService.ConsumeOauthCallback(cacheKey)
 	if oauthCache == nil {
 		c.HTML(http.StatusOK, "oauth_fail.html", gin.H{
 			"message": "OauthExpired",
+		})
+		return
+	}
+	if providerError := c.Query("error"); providerError != "" {
+		c.HTML(http.StatusOK, "oauth_fail.html", gin.H{
+			"message":     "OauthFailed",
+			"sub_message": providerError,
 		})
 		return
 	}
@@ -171,6 +183,13 @@ func (o *Oauth) OauthCallback(c *gin.Context) {
 	var user *model.User
 	// 获取用户信息
 	code := c.Query("code")
+	if code == "" {
+		c.HTML(http.StatusOK, "oauth_fail.html", gin.H{
+			"message":     "ParamIsEmpty",
+			"sub_message": "code",
+		})
+		return
+	}
 	err, oauthUser := oauthService.Callback(code, verifier, op, nonce)
 	if err != nil {
 		c.HTML(http.StatusOK, "oauth_fail.html", gin.H{

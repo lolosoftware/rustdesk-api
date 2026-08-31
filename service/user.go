@@ -325,6 +325,12 @@ func (us *UserService) InfoByOauthId(op string, openId string) *model.User {
 
 // RegisterByOauth 注册
 func (us *UserService) RegisterByOauth(oauthUser *model.OauthUser, op string) (error, *model.User) {
+	if oauthUser == nil || strings.TrimSpace(oauthUser.OpenId) == "" {
+		return errors.New("OauthIdentityInvalid"), nil
+	}
+	if strings.TrimSpace(oauthUser.Email) != "" && !oauthUser.VerifiedEmail {
+		return errors.New("OauthEmailNotVerified"), nil
+	}
 	Lock.Lock("registerByOauth")
 	defer Lock.UnLock("registerByOauth")
 	ut := AllService.OauthService.UserThirdInfo(op, oauthUser.OpenId)

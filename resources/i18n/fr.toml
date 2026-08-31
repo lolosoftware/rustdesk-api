@@ -182,3 +182,18 @@ other = "Banni."
 description = "Register success wait admin confirm."
 one = "Inscription réussie, veuillez attendre la confirmation de l'administrateur."
 other = "Inscription réussie, veuillez attendre la confirmation de l'administrateur."
+
+[IDTokenMissing]
+description = "OIDC ID token missing."
+one = "Le fournisseur n’a pas renvoyé de jeton d’identité valide."
+other = "Le fournisseur n’a pas renvoyé de jeton d’identité valide."
+
+[OauthEmailNotVerified]
+description = "OAuth email is not verified."
+one = "L’adresse e-mail fournie par le service d’identité n’est pas vérifiée."
+other = "L’adresse e-mail fournie par le service d’identité n’est pas vérifiée."
+
+[OauthIdentityInvalid]
+description = "OAuth identity is invalid."
+one = "L’identité renvoyée par le fournisseur est invalide."
+other = "L’identité renvoyée par le fournisseur est invalide."
