@@ -34,6 +34,38 @@ func TestVerifyOTPCode(t *testing.T) {
 	}
 }
 
+func TestOTPLoginChallengeIsBoundAndSingleUse(t *testing.T) {
+	users := &UserService{}
+	u := &model.User{
+		IdModel:    model.IdModel{Id: 42},
+		Username:   "otp-user",
+		OtpEnabled: true,
+		OtpSecret:  "JBSWY3DPEHPK3PXP",
+	}
+
+	secret, err := users.CreateOTPLoginChallenge(u, "device-id", "device-uuid")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if secret == "" || secret == u.OtpSecret {
+		t.Fatalf("challenge must be opaque, got %q", secret)
+	}
+	if got := users.GetOTPLoginChallenge(secret, u.Username, "other-device", "device-uuid"); got != nil {
+		t.Fatal("challenge accepted for a different device")
+	}
+
+	challenge := users.GetOTPLoginChallenge(secret, u.Username, "device-id", "device-uuid")
+	if challenge == nil || challenge.UserID != u.Id {
+		t.Fatal("valid challenge was not found")
+	}
+	if !users.ConsumeOTPLoginChallenge(secret, challenge) {
+		t.Fatal("valid challenge was not consumed")
+	}
+	if users.GetOTPLoginChallenge(secret, u.Username, "device-id", "device-uuid") != nil {
+		t.Fatal("consumed challenge was accepted again")
+	}
+}
+
 func TestUserOTPEnrollmentRequiresValidCode(t *testing.T) {
 	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
 	if err != nil {

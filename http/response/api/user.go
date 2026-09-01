@@ -56,3 +56,13 @@ type LoginRes struct {
 	Secret      string      `json:"secret,omitempty"`
 	TfaType     string      `json:"tfa_type,omitempty"`
 }
+
+const (
+	AuthRequestTypeAccount   = "account"
+	AuthRequestTypeTfaCode   = "tfa_code"
+	AuthRequestTypeEmailCode = "email_code"
+
+	AuthResponseTypeToken      = "access_token"
+	AuthResponseTypeEmailCheck = "email_check"
+	AuthResponseTypeTfaCheck   = "tfa_check"
+)

@@ -36,7 +36,14 @@ type LoginForm struct {
 	Uuid       string            `json:"uuid"  label:"uuid"`
 	Username   string            `json:"username" validate:"required,gte=2,lte=32" label:"用户名"`
 	Password   string            `json:"password,omitempty" validate:"gte=4,lte=32" label:"密码"`
-	OtpCode    string            `json:"otp_code,omitempty" label:"OTP"`
+	// RustDesk sends these fields during the second step of account 2FA.
+	// The request type is currently "email_code" even for a TOTP challenge.
+	VerificationCode string `json:"verificationCode,omitempty" label:"VerificationCode"`
+	TfaCode          string `json:"tfaCode,omitempty" label:"TFA"`
+	Secret           string `json:"secret,omitempty" label:"Challenge"`
+	// OtpCode is kept for backwards compatibility with API consumers that
+	// submit the password and TOTP code in a single request.
+	OtpCode string `json:"otp_code,omitempty" label:"OTP"`
 }
 
 type UserListQuery struct {

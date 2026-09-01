@@ -2,10 +2,12 @@ package service
 
 import (
 	"bytes"
+	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"image/png"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/lejianwen/rustdesk-api/v2/model"
@@ -17,6 +19,18 @@ var (
 	ErrOTPNotConfigured  = errors.New("OTP is not configured")
 	ErrOTPInvalidCode    = errors.New("invalid OTP code")
 )
+
+const otpLoginChallengeLifetime = 5 * time.Minute
+
+type OTPLoginChallenge struct {
+	UserID     uint
+	Username   string
+	DeviceID   string
+	DeviceUUID string
+	ExpiresAt  time.Time
+}
+
+var otpLoginChallenges sync.Map
 
 type OTPEnrollment struct {
 	Secret          string `json:"secret"`
@@ -56,6 +70,58 @@ func VerifyOTPCode(secret, code string) bool {
 		}
 	}
 	return totp.Validate(code, secret)
+}
+
+// CreateOTPLoginChallenge creates an opaque, short-lived handle for the
+// second login step. The stored value never contains the user's TOTP secret.
+func (us *UserService) CreateOTPLoginChallenge(u *model.User, deviceID, deviceUUID string) (string, error) {
+	if u == nil || u.Id == 0 || !u.OtpEnabled || strings.TrimSpace(u.OtpSecret) == "" {
+		return "", ErrOTPNotConfigured
+	}
+	random := make([]byte, 32)
+	if _, err := rand.Read(random); err != nil {
+		return "", err
+	}
+	secret := base64.RawURLEncoding.EncodeToString(random)
+	challenge := &OTPLoginChallenge{
+		UserID:     u.Id,
+		Username:   u.Username,
+		DeviceID:   deviceID,
+		DeviceUUID: deviceUUID,
+		ExpiresAt:  time.Now().Add(otpLoginChallengeLifetime),
+	}
+	otpLoginChallenges.Store(secret, challenge)
+	time.AfterFunc(otpLoginChallengeLifetime, func() {
+		if current, ok := otpLoginChallenges.Load(secret); ok && current == challenge {
+			otpLoginChallenges.Delete(secret)
+		}
+	})
+	return secret, nil
+}
+
+// GetOTPLoginChallenge validates the challenge and binds it to the same user
+// and device identifiers used during the password step.
+func (us *UserService) GetOTPLoginChallenge(secret, username, deviceID, deviceUUID string) *OTPLoginChallenge {
+	value, ok := otpLoginChallenges.Load(strings.TrimSpace(secret))
+	if !ok {
+		return nil
+	}
+	challenge, ok := value.(*OTPLoginChallenge)
+	if !ok || time.Now().After(challenge.ExpiresAt) {
+		otpLoginChallenges.Delete(strings.TrimSpace(secret))
+		return nil
+	}
+	if challenge.Username != username || challenge.DeviceID != deviceID || challenge.DeviceUUID != deviceUUID {
+		return nil
+	}
+	return challenge
+}
+
+// ConsumeOTPLoginChallenge makes a successfully verified challenge single-use.
+// The pointer check prevents a replaced entry from being consumed accidentally.
+func (us *UserService) ConsumeOTPLoginChallenge(secret string, expected *OTPLoginChallenge) bool {
+	value, ok := otpLoginChallenges.LoadAndDelete(strings.TrimSpace(secret))
+	return ok && value == expected
 }
 
 func (us *UserService) BeginUserOTPEnrollment(u *model.User) (*OTPEnrollment, error) {

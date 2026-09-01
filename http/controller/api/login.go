@@ -48,6 +48,14 @@ func (l *Login) Login(c *gin.Context) {
 		return
 	}
 
+	// RustDesk uses "email_code" for the verification-code request and
+	// distinguishes TOTP through the tfaCode field. Accept "tfa_code" too for
+	// compatibility with clients that use the dedicated request type.
+	if (f.Type == apiResp.AuthRequestTypeEmailCode || f.Type == apiResp.AuthRequestTypeTfaCode) && strings.TrimSpace(f.TfaCode) != "" {
+		l.loginWithOTPChallenge(c, f, clientIp)
+		return
+	}
+
 	errList := global.Validator.ValidStruct(c, f)
 	if len(errList) > 0 {
 		loginLimiter.RecordFailedAttempt(clientIp)
@@ -71,7 +79,21 @@ func (l *Login) Login(c *gin.Context) {
 	}
 
 	if u.OtpEnabled {
-		if strings.TrimSpace(f.OtpCode) == "" || !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
+		if strings.TrimSpace(f.OtpCode) == "" {
+			secret, err := service.AllService.UserService.CreateOTPLoginChallenge(u, f.Id, f.Uuid)
+			if err != nil {
+				response.Error(c, response.TranslateMsg(c, "SystemError"))
+				return
+			}
+			c.JSON(http.StatusOK, apiResp.LoginRes{
+				Type:    apiResp.AuthResponseTypeEmailCheck,
+				TfaType: apiResp.AuthResponseTypeTfaCheck,
+				Secret:  secret,
+				User:    *(&apiResp.UserPayload{}).FromUser(u),
+			})
+			return
+		}
+		if !service.AllService.UserService.VerifyUserOTP(u, f.OtpCode) {
 			loginLimiter.RecordFailedAttempt(clientIp)
 			response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
 			return
@@ -96,7 +118,44 @@ func (l *Login) Login(c *gin.Context) {
 
 	c.JSON(http.StatusOK, apiResp.LoginRes{
 		AccessToken: ut.Token,
-		Type:        "access_token",
+		Type:        apiResp.AuthResponseTypeToken,
+		User:        *(&apiResp.UserPayload{}).FromUser(u),
+	})
+}
+
+func (l *Login) loginWithOTPChallenge(c *gin.Context, f *api.LoginForm, clientIp string) {
+	loginLimiter := global.LoginLimiter
+	challenge := service.AllService.UserService.GetOTPLoginChallenge(f.Secret, f.Username, f.Id, f.Uuid)
+	if challenge == nil {
+		loginLimiter.RecordFailedAttempt(clientIp)
+		response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
+		return
+	}
+	u := service.AllService.UserService.InfoById(challenge.UserID)
+	if u.Id == 0 || !service.AllService.UserService.CheckUserEnable(u) ||
+		!service.AllService.UserService.VerifyUserOTP(u, f.TfaCode) {
+		loginLimiter.RecordFailedAttempt(clientIp)
+		response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
+		return
+	}
+	if !service.AllService.UserService.ConsumeOTPLoginChallenge(f.Secret, challenge) {
+		loginLimiter.RecordFailedAttempt(clientIp)
+		response.Error(c, response.TranslateMsg(c, "OtpCodeError"))
+		return
+	}
+
+	ut := service.AllService.UserService.Login(u, &model.LoginLog{
+		UserId:   u.Id,
+		Client:   f.DeviceInfo.Type,
+		DeviceId: f.Id,
+		Uuid:     f.Uuid,
+		Ip:       clientIp,
+		Type:     model.LoginLogTypeAccount,
+		Platform: f.DeviceInfo.Os,
+	})
+	c.JSON(http.StatusOK, apiResp.LoginRes{
+		AccessToken: ut.Token,
+		Type:        apiResp.AuthResponseTypeToken,
 		User:        *(&apiResp.UserPayload{}).FromUser(u),
 	})
 }
